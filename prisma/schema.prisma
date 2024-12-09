@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -15,6 +12,7 @@ enum UserRole {
   ADMIN
 }
 
+// Pode manter o model User caso use em outras partes da aplicação, não é necessário apagar
 model User {
   id                     String    @id @default(cuid())
   name                   String
@@ -98,15 +96,30 @@ model Currency {
   dollar Decimal @default(5.60)
 }
 
+// Novo model Cliente
+model Cliente {
+  id_cliente Int    @id @default(autoincrement())
+  cpf        String
+  nome       String
+  sobrenome  String
+  email      String
+
+  faturas Fatura[]
+}
+
+// Ajustamos a fatura para se relacionar a Cliente
 model Fatura {
   id_fatura                Int       @id @default(autoincrement())
   valor_final              Float
-  status_fatura            Int       @default(0) // 0 = pendente, 1 = pago
+  status_fatura            Int       @default(0)
   data_criacao             DateTime? @default(now())
   data_pagamento           DateTime?
   id_preferencia_pagamento String?
   link_pagamento           String?
   external_reference       String?   @unique
+
+  clienteId Int?
+  cliente   Cliente? @relation(fields: [clienteId], references: [id_cliente])
 
   pagamentos Pagamento[]
 

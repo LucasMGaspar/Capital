@@ -12,8 +12,7 @@ import Image from "next/image";
 import shopCartImage from "@/assets/shop-cart.png";
 
 export default function CartClient() {
-  const { cart, decreaseQuantity, addProductIntoCart, removeFromCart } =
-    useCartStore();
+  const { cart, decreaseQuantity, addProductIntoCart, removeFromCart } = useCartStore();
 
   const parsedCart = cart.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -26,8 +25,10 @@ export default function CartClient() {
       const priceNumber = parseFloat(cleanPrice);
       return total + priceNumber * product.quantity;
     }, 0);
-    return total.toFixed(2);
+    return Math.round(total * 100) / 100; // Arredonda para duas casas decimais
   };
+
+  const totalValue = calculateTotal();
 
   return (
     <div className="p-4 w-full max-w-[1250px] m-auto flex flex-col md:flex-row">
@@ -111,10 +112,7 @@ export default function CartClient() {
           <div className="flex justify-between font-bold text-xl mt-4">
             <span>Total:</span>
             <span>
-              {parseFloat(calculateTotal()).toLocaleString("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              })}
+              R$ {totalValue.toFixed(2)}
             </span>
           </div>
           <div className="flex flex-col gap-4 mt-4">
@@ -123,13 +121,7 @@ export default function CartClient() {
               buttonLabel="COMPRAR"
               actionType="purchase"
               modalTitle="Ordem de Compra"
-            />
-
-            {/* Botão GERAR ORÇAMENTO */}
-            <ModalGeneratePO
-              buttonLabel="GERAR ORÇAMENTO"
-              actionType="quote"
-              modalTitle="Orçamento"
+              totalValue={totalValue}
             />
 
             {/* Botão CONTINUAR COMPRANDO */}
