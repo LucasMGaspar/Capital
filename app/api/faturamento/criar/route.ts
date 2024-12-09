@@ -1,6 +1,6 @@
 // pages/api/faturamento/criar.ts
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { prisma } from "../../../lib/db";
+import { prisma } from "../../../../lib/db";
 import mercadopago from 'mercadopago';
 
  // @ts-ignore
