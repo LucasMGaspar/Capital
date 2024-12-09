@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -99,4 +96,36 @@ model Product {
 model Currency {
   id     String  @id @default(cuid())
   dollar Decimal @default(5.60)
+}
+
+model Fatura {
+  id_fatura                Int       @id @default(autoincrement())
+  valor_final              Float
+  status_fatura            Int       @default(0) // 0 = pendente, 1 = pago
+  data_criacao             DateTime? @default(now())
+  data_pagamento           DateTime?
+  id_preferencia_pagamento String?
+  link_pagamento           String?
+  external_reference       String?   @unique
+
+  pagamentos Pagamento[]
+
+  @@map("fatura")
+}
+
+model Pagamento {
+  id_pagamento          Int       @id @default(autoincrement())
+  data_cadastro         DateTime? @default(now())
+  payment_id            String    @unique
+  payment_status        String
+  merchant_order_id     String?
+  payment_method_id     String?
+  payment_type_id       String?
+  payment_status_detail String?
+  external_reference    String?
+
+  faturaId Int?
+  fatura   Fatura? @relation(fields: [faturaId], references: [id_fatura])
+
+  @@map("pagamento")
 }
