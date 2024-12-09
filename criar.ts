@@ -60,9 +60,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
       external_reference: referencia,
       back_urls: {
-        success: "https://www.nacapitalhonest.com/sucesso",
-        pending: "https://www.nacapitalhonest.com/pending",
-        failure: "https://www.nacapitalhonest.com/failure"
+        success: "https://nacapitalhonest.com/sucesso",
+        pending: "https://nacapitalhonest.com/pending",
+        failure: "https://nacapitalhonest.com/failure"
       },
       auto_return: "approved",
       statement_descriptor: "NaCapitalHonest",
