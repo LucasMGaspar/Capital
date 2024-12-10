@@ -4,12 +4,12 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
-    const { totalValue } = await request.json();
+    const { valor_final } = await request.json();
 
-    // Validação básica do valor total
-    if (typeof totalValue !== 'number' || totalValue <= 0) {
+    // Validação básica do valor final
+    if (typeof valor_final !== 'number' || valor_final <= 0) {
       return NextResponse.json(
-        { error: 'Valor total inválido.' },
+        { error: 'Valor final inválido.' },
         { status: 400 }
       );
     }
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
           // Adicione quaisquer outros headers necessários aqui, como autenticação
         },
         body: JSON.stringify({
-          totalValue, // Envia o valor total recebido do frontend
+          valor_final, // Envia o valor final recebido do frontend
           // Adicione outros campos conforme a necessidade da API
         }),
       }
