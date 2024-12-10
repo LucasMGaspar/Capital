@@ -47,7 +47,7 @@ export default function CartClient() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          totalValue: totalValue,
+          valor_final: totalValue, // Envia "valor_final" conforme esperado pela API
         }),
       });
 
