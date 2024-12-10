@@ -3,65 +3,52 @@
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
-  console.log('API Route /api/createPayment foi chamada.');
-
   try {
     const { valor_final } = await request.json();
-    console.log('Valor Final Recebido:', valor_final);
 
-    // Converte "valor_final" para número se for string
-    const valorFinalNumber =
-      typeof valor_final === 'string'
-        ? parseFloat(valor_final.replace(',', '.'))
-        : valor_final;
-
-    console.log('Valor Final Convertido:', valorFinalNumber);
-
-    // Validação básica do valor final
-    if (isNaN(valorFinalNumber) || valorFinalNumber <= 0) {
-      console.error('Valor final inválido:', valorFinalNumber);
+    // Validação do valor_final
+    if (typeof valor_final !== 'number' || valor_final <= 0) {
       return NextResponse.json(
-        { error: 'Valor final inválido.' },
+        { error: 'O valor final deve ser um número maior que 0.' },
         { status: 400 }
       );
     }
 
-    // Chamada à API externa para criar a fatura
-    const apiResponse = await fetch(
+    // Configurando a requisição para a API externa
+    const response = await fetch(
       'https://roatrip.tur.br/api/v1/public/faturamentonacapital/criar',
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Adicione quaisquer outros headers necessários aqui, como autenticação
         },
         body: JSON.stringify({
-          valor_final: valorFinalNumber, // Envia o valor final como número
-          // Adicione outros campos conforme a necessidade da API
+          valor_final, // Enviando o valor_final recebido do cliente
         }),
       }
     );
 
-    console.log('Resposta da API Externa Status:', apiResponse.status);
-
-    if (!apiResponse.ok) {
-      const errorData = await apiResponse.json();
-      console.error('Erro da API Externa:', errorData.message || 'Erro ao criar a fatura.');
-      throw new Error(errorData.message || 'Erro ao criar a fatura.');
+    // Verificando se a requisição para a API foi bem-sucedida
+    if (!response.ok) {
+      const errorData = await response.json();
+      return NextResponse.json(
+        { error: errorData.message || 'Erro ao criar fatura.' },
+        { status: response.status }
+      );
     }
 
-    const data = await apiResponse.json();
-    console.log('Dados Recebidos da API Externa:', data);
+    const data = await response.json();
 
-    // Verifica se a resposta contém o link de pagamento
-    if (data.paymentLink) {
-      return NextResponse.json({ paymentLink: data.paymentLink }, { status: 200 });
+    // Verificando se o link de pagamento foi retornado
+    if (data.link_pagamento) {
+      return NextResponse.json({ paymentLink: data.link_pagamento });
     } else {
-      console.error('Link de pagamento não encontrado na resposta.');
-      throw new Error('Link de pagamento não encontrado.');
+      return NextResponse.json(
+        { error: 'Link de pagamento não encontrado na resposta.' },
+        { status: 500 }
+      );
     }
   } catch (error: any) {
-    console.error('Erro Interno da API:', error.message || 'Erro interno do servidor.');
     return NextResponse.json(
       { error: error.message || 'Erro interno do servidor.' },
       { status: 500 }

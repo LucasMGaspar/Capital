@@ -1,5 +1,3 @@
-// CartClient.tsx
-
 "use client";
 
 import { useState } from "react";
@@ -17,67 +15,55 @@ export default function CartClient() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Ordena o carrinho alfabeticamente pelo nome do produto
+  // Ordenando o carrinho alfabeticamente pelo nome
   const parsedCart = [...cart].sort((a, b) => a.name.localeCompare(b.name));
 
-  // Calcula o valor total do carrinho
+  // Calculando o valor total do carrinho
   const calculateTotal = () => {
-    const total = parsedCart.reduce((total, product) => {
+    const total = parsedCart.reduce((acc, product) => {
       const cleanPrice = product.price
         .replace("R$", "")
         .replace(/\s/g, "")
         .replace(",", ".");
       const priceNumber = parseFloat(cleanPrice);
-      return total + priceNumber * product.quantity;
+      return acc + priceNumber * product.quantity;
     }, 0);
-    return Math.round(total * 100) / 100; // Arredonda para duas casas decimais
+    return Math.round(total * 100) / 100; // Arredondar para 2 casas decimais
   };
 
   const totalValue = calculateTotal();
 
-  // Função para lidar com a compra
+  // Função para lidar com o botão "COMPRAR"
   const handlePurchase = async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      // Assegura que valor_final é um número com ponto decimal
-      const valorFinal = Number(totalValue.toFixed(2));
-      console.log('Enviando valor_final:', valorFinal);
-
       const response = await fetch("/api/createPayment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          valor_final: valorFinal, // Envia "valor_final" como número
+          valor_final: totalValue,
         }),
       });
 
-      console.log('Resposta da API Status:', response.status);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Erro ao processar a compra.");
+      }
 
-      // Verifica se a resposta é JSON antes de tentar parsear
-      const contentType = response.headers.get("Content-Type");
-      if (contentType && contentType.includes("application/json")) {
-        const data = await response.json();
-        console.log('Dados Recebidos do Frontend:', data);
+      const data = await response.json();
 
-        if (data.paymentLink) {
-          // Redireciona para o link de pagamento
-          window.location.href = data.paymentLink;
-        } else {
-          throw new Error("Link de pagamento não encontrado na resposta.");
-        }
+      if (data.paymentLink) {
+        // Redirecionar para o link de pagamento
+        window.location.href = data.paymentLink;
       } else {
-        // Se a resposta não for JSON, loga o texto completo
-        const text = await response.text();
-        console.error('Resposta não JSON:', text);
-        throw new Error("Resposta inválida do servidor.");
+        throw new Error("Link de pagamento não encontrado.");
       }
     } catch (err: any) {
-      console.error('Erro no Frontend:', err.message || "Ocorreu um erro inesperado.");
-      setError(err.message || "Ocorreu um erro inesperado.");
+      setError(err.message || "Erro inesperado.");
     } finally {
       setIsLoading(false);
     }
@@ -105,7 +91,7 @@ export default function CartClient() {
                   <p className="bg-[#cf964d] text-primary-foreground w-fit px-2 py-[2px] rounded-lg cursor-default text-sm">
                     {product.category}
                   </p>
-                  <p className="text-xl font-semibold text-primary ">
+                  <p className="text-xl font-semibold text-primary">
                     <PriceCalculedComponent price={product.price} />
                   </p>
                 </div>
@@ -144,7 +130,7 @@ export default function CartClient() {
         </div>
       ) : (
         <div className="flex flex-col gap-2 items-center justify-center min-h-[60vh] w-full">
-          <Image src={shopCartImage} alt="Carrinho Vazio" />
+          <Image src={shopCartImage} alt="Carrinho vazio" />
           <p className="text-center p-4 rounded-lg">Nenhum produto no carrinho.</p>
         </div>
       )}
@@ -164,12 +150,9 @@ export default function CartClient() {
           ))}
           <div className="flex justify-between font-bold text-xl mt-4">
             <span>Total:</span>
-            <span>
-              R$ {totalValue.toFixed(2)}
-            </span>
+            <span>R$ {totalValue.toFixed(2)}</span>
           </div>
           <div className="flex flex-col gap-4 mt-4">
-            {/* Botão COMPRAR */}
             <button
               onClick={handlePurchase}
               disabled={isLoading}
@@ -177,15 +160,7 @@ export default function CartClient() {
             >
               {isLoading ? "Processando..." : "COMPRAR"}
             </button>
-
-            {/* Exibir erro, se houver */}
-            {error && (
-              <p className="text-red-500 text-sm mt-2">
-                {error}
-              </p>
-            )}
-
-            {/* Botão CONTINUAR COMPRANDO */}
+            {error && <p className="text-red-500 text-sm">{error}</p>}
             <ContinueBuyingButton />
           </div>
         </div>
