@@ -43,6 +43,7 @@ export default function CartClient() {
     try {
       // Assegura que valor_final é um número com ponto decimal
       const valorFinal = Number(totalValue.toFixed(2));
+      console.log('Enviando valor_final:', valorFinal);
 
       const response = await fetch("/api/createPayment", {
         method: "POST",
@@ -54,20 +55,28 @@ export default function CartClient() {
         }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Falha ao criar a fatura de pagamento.");
-      }
+      console.log('Resposta da API Status:', response.status);
 
-      const data = await response.json();
+      // Verifica se a resposta é JSON antes de tentar parsear
+      const contentType = response.headers.get("Content-Type");
+      if (contentType && contentType.includes("application/json")) {
+        const data = await response.json();
+        console.log('Dados Recebidos do Frontend:', data);
 
-      if (data.paymentLink) {
-        // Redireciona para o link de pagamento
-        window.location.href = data.paymentLink;
+        if (data.paymentLink) {
+          // Redireciona para o link de pagamento
+          window.location.href = data.paymentLink;
+        } else {
+          throw new Error("Link de pagamento não encontrado na resposta.");
+        }
       } else {
-        throw new Error("Link de pagamento não encontrado na resposta.");
+        // Se a resposta não for JSON, loga o texto completo
+        const text = await response.text();
+        console.error('Resposta não JSON:', text);
+        throw new Error("Resposta inválida do servidor.");
       }
     } catch (err: any) {
+      console.error('Erro no Frontend:', err.message || "Ocorreu um erro inesperado.");
       setError(err.message || "Ocorreu um erro inesperado.");
     } finally {
       setIsLoading(false);
