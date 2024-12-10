@@ -6,8 +6,14 @@ export async function POST(request: Request) {
   try {
     const { valor_final } = await request.json();
 
+    // Converte "valor_final" para número se for string
+    const valorFinalNumber =
+      typeof valor_final === 'string'
+        ? parseFloat(valor_final.replace(',', '.'))
+        : valor_final;
+
     // Validação básica do valor final
-    if (typeof valor_final !== 'number' || valor_final <= 0) {
+    if (isNaN(valorFinalNumber) || valorFinalNumber <= 0) {
       return NextResponse.json(
         { error: 'Valor final inválido.' },
         { status: 400 }
@@ -24,7 +30,7 @@ export async function POST(request: Request) {
           // Adicione quaisquer outros headers necessários aqui, como autenticação
         },
         body: JSON.stringify({
-          valor_final, // Envia o valor final recebido do frontend
+          valor_final: valorFinalNumber, // Envia o valor final como número
           // Adicione outros campos conforme a necessidade da API
         }),
       }

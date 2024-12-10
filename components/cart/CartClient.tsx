@@ -41,13 +41,16 @@ export default function CartClient() {
     setError(null);
 
     try {
+      // Assegura que valor_final é um número com ponto decimal
+      const valorFinal = Number(totalValue.toFixed(2));
+
       const response = await fetch("/api/createPayment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          valor_final: totalValue, // Envia "valor_final" conforme esperado pela API
+          valor_final: valorFinal, // Envia "valor_final" como número
         }),
       });
 
