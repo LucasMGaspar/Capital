@@ -2,11 +2,11 @@
 
 "use client";
 
+import { useState } from "react";
 import { useCartStore } from "@/store/cartStore";
 import { PriceCalculed as PriceCalculedComponent } from "@/components/PriceCalculed";
 import { ProductName } from "@/components/productNameClient";
 import ContinueBuyingButton from "@/components/cart/ContinueBuyingButton";
-import ModalGeneratePO from "@/components/cart/ModalGeneratePO";
 import { Trash2 } from "lucide-react";
 import Image from "next/image";
 import shopCartImage from "@/assets/shop-cart.png";
@@ -14,8 +14,13 @@ import shopCartImage from "@/assets/shop-cart.png";
 export default function CartClient() {
   const { cart, decreaseQuantity, addProductIntoCart, removeFromCart } = useCartStore();
 
-  const parsedCart = cart.sort((a, b) => a.name.localeCompare(b.name));
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  // Ordena o carrinho alfabeticamente pelo nome do produto
+  const parsedCart = [...cart].sort((a, b) => a.name.localeCompare(b.name));
+
+  // Calcula o valor total do carrinho
   const calculateTotal = () => {
     const total = parsedCart.reduce((total, product) => {
       const cleanPrice = product.price
@@ -29,6 +34,42 @@ export default function CartClient() {
   };
 
   const totalValue = calculateTotal();
+
+  // Função para lidar com a compra
+  const handlePurchase = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/createPayment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          totalValue: totalValue,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Falha ao criar a fatura de pagamento.");
+      }
+
+      const data = await response.json();
+
+      if (data.paymentLink) {
+        // Redireciona para o link de pagamento
+        window.location.href = data.paymentLink;
+      } else {
+        throw new Error("Link de pagamento não encontrado na resposta.");
+      }
+    } catch (err: any) {
+      setError(err.message || "Ocorreu um erro inesperado.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="p-4 w-full max-w-[1250px] m-auto flex flex-col md:flex-row">
@@ -91,7 +132,7 @@ export default function CartClient() {
         </div>
       ) : (
         <div className="flex flex-col gap-2 items-center justify-center min-h-[60vh] w-full">
-          <Image src={shopCartImage} alt="" />
+          <Image src={shopCartImage} alt="Carrinho Vazio" />
           <p className="text-center p-4 rounded-lg">Nenhum produto no carrinho.</p>
         </div>
       )}
@@ -117,12 +158,20 @@ export default function CartClient() {
           </div>
           <div className="flex flex-col gap-4 mt-4">
             {/* Botão COMPRAR */}
-            <ModalGeneratePO
-              buttonLabel="COMPRAR"
-              actionType="purchase"
-              modalTitle="Ordem de Compra"
-              totalValue={totalValue}
-            />
+            <button
+              onClick={handlePurchase}
+              disabled={isLoading}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+            >
+              {isLoading ? "Processando..." : "COMPRAR"}
+            </button>
+
+            {/* Exibir erro, se houver */}
+            {error && (
+              <p className="text-red-500 text-sm mt-2">
+                {error}
+              </p>
+            )}
 
             {/* Botão CONTINUAR COMPRANDO */}
             <ContinueBuyingButton />
