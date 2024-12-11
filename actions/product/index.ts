@@ -28,6 +28,7 @@ type UpdatedProducts = {
   price: number;
   isFeatured: boolean;
   category: string;
+  image: string
 };
 
 export const saveProduct = async (product: ProductProps) => {
@@ -95,6 +96,7 @@ export const updateProduct = async (
     isFeatured,
     category,
     price,
+    image
   }: UpdatedProducts
 ) => {
   if (name.length > 80) {
@@ -110,6 +112,7 @@ export const updateProduct = async (
         cod_prod: cod_prod,
         isFeatured: isFeatured,
         category: category,
+        image: image
       },
       where: { id },
     });
