@@ -10,10 +10,11 @@ export const configRoutes: ConfigRoutes = {
 		"/auth/verify-email",
 		"/contact",
 		"/about",
-		"/product"
+		"/product",
+		"/cart"
 	],
 	authRoutes: ["/api/auth/signin"],
 	apiRoutes: ["/api/protected-api"],
-	protectedRoutes: ["/auth/settings", "/auth/settings/2fa", "/cart"],
+	protectedRoutes: ["/auth/settings", "/auth/settings/2fa", ],
 	adminRoutes: ["/admin"],
 };

@@ -122,7 +122,7 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
     // Aplicar o filtro existente
     filteredProducts = formattedProducts
       .filter((product) => {
-        return filter === "FEATURED PRODUCTS" ? product.isFeatured : product.category === filter;
+        return filter === "Produtos" ? product.isFeatured : product.category === filter;
       })
       .sort((a, b) => a.name.localeCompare(b.name));
   }

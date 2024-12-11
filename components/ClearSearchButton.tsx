@@ -8,7 +8,7 @@ export default function ClearSearchButton() {
   // Função para limpar a pesquisa e resetar o filtro ao estado inicial
   function handleClearSearch(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
     event.preventDefault();  // Previne o comportamento padrão do link
-    useFilterProductStore.getState().changeFilteredProduct("FEATURED PRODUCTS");
+    useFilterProductStore.getState().changeFilteredProduct("Produtos");
     window.location.href = "/";  // Redireciona para a página inicial forçando o recarregamento
   }
 

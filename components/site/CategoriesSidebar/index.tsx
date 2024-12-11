@@ -35,7 +35,7 @@ export async function SheetCategoriesSidebar() {
                 </SheetHeader>
                 <SheetClose asChild>
                     <form action={handleSubmit} className="flex flex-col mt-5">
-                        <input type="hidden" name="category" value="FEATURED PRODUCTS" />
+                        <input type="hidden" name="category" value="Produtos" />
                         
                     </form>
                 </SheetClose>
