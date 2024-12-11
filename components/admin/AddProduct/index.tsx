@@ -68,19 +68,19 @@ export default function AddProductButton() {
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
-        <Button variant="default">Add Product</Button>
+        <Button variant="default">Adicionar Produto</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] lg:max-w-[450px]">
         <DialogHeader>
-          <DialogTitle>Product Info</DialogTitle>
+          <DialogTitle>Cadastro Produto</DialogTitle>
           <DialogDescription>
-            Fill in the new product details.
+           
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-2 gap-4 py-3">
             <div className="grid grid-cols-2 items-center">
-              <Label htmlFor="cod_prod">Codido</Label>
+              <Label htmlFor="cod_prod">Codigo</Label>
               <Input
                 id="cod_prod"
                 name="cod_prod"
@@ -130,7 +130,7 @@ export default function AddProductButton() {
               />
             </div>
             <div className="grid grid-cols-2 mt-3 gap-[2px] items-center">
-              <Label htmlFor="image">Image</Label>
+              <Label htmlFor="image">Imagem</Label>
               <Input
                 id="image"
                 name="image"
@@ -141,7 +141,7 @@ export default function AddProductButton() {
               />
             </div>
             <div className="flex mt-4 gap-3 w-full items-center">
-              <Label htmlFor="isFeatured">Mark as featured product?</Label>
+              <Label htmlFor="isFeatured">Mais vendidos?</Label>
               <Checkbox
                 id="isFeatured"
                 name="isFeatured"
@@ -160,7 +160,7 @@ export default function AddProductButton() {
           )}
           <DialogFooter className="mt-5">
             <Button type="submit" variant="default">
-              Save Product
+              Salvar Produto
             </Button>
           </DialogFooter>
         </form>

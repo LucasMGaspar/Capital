@@ -14,31 +14,16 @@ export default function AdminForm() {
 
     fileToBase64(file)
       .then((base64Image) => {
-        // Convertemos os valores string do formulário para números
         const priceString = formData.get("price") as string;
         const formattedPrice = parseFloat(priceString.replace(",", "."));
-
-        const profitRateString = formData.get("profitRate") as string;
-        const profitRate = parseFloat(profitRateString) || 0;
-
-        const costPriceString = formData.get("costPrice") as string;
-        const formattedCostPrice = parseFloat(
-          costPriceString.replace(",", ".")
-        );
-
-        const formattedPriceWithProfit =
-          formattedPrice + (formattedPrice * profitRate) / 100;
 
         const product: ProductProps = {
           name: formData.get("name") as string,
           cod_prod: formData.get("cod_prod") as string,
           image: base64Image as string,
-          price: formattedPriceWithProfit, // Garantido como número
-          costPrice: formattedCostPrice, // Garantido como número
-          description: formData.get("description") as string,
+          price: formattedPrice, // Garantido como número
           category: formData.get("category") as string,
           isFeatured: Boolean(formData.get("isFeatured")),
-          profitRate: profitRate, // Já é número
         };
 
         if (formattedPrice > 0) {
@@ -108,21 +93,6 @@ export default function AdminForm() {
             required
           />
         </div>
-        <div className="w-full pb-5 px-8">
-          <label
-            htmlFor="description"
-            className="block text-md font-medium text-gray-600"
-          >
-            Descrição
-          </label>
-          <textarea
-            name="description"
-            id="description"
-            className="input input-bordered input-primary w-full max-w-xs border p-2 rounded-sm resize-none"
-            placeholder="Descrição do produto..."
-            required
-          />
-        </div>
         <div className="mb-5 w-full px-8">
           <label
             htmlFor="price"
@@ -171,38 +141,6 @@ export default function AdminForm() {
             name="isFeatured"
             id="isFeatured"
             className="input input-bordered input-primary border max-w-xs p-2 ml-3"
-          />
-        </div>
-        <div className="mb-5 w-full px-8">
-          <label
-            htmlFor="costPrice"
-            className="block text-md font-medium text-gray-600"
-          >
-            Preço de Custo R$
-          </label>
-          <input
-            type="text"
-            name="costPrice"
-            id="costPrice"
-            className="input input-bordered input-primary border w-full max-w-xs p-2"
-            placeholder="0,00"
-            required
-          />
-        </div>
-        <div className="mb-5 w-full px-8">
-          <label
-            htmlFor="profitRate"
-            className="block text-md font-medium text-gray-600"
-          >
-            Taxa de Lucro (%)
-          </label>
-          <input
-            type="text"
-            name="profitRate"
-            id="profitRate"
-            className="input input-bordered input-primary border w-full max-w-xs p-2"
-            placeholder="0"
-            required
           />
         </div>
         <div className="mb-5">

@@ -39,7 +39,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
                         <p className="text-gray-900 text-lg font-semibold mb-4">
                             <PriceCalculed price={product.price.toString()} />
                         </p>
-                        <p className="text-gray-500">{product.description}</p>
+                        
                         <p className='text-gray-500 mt-4'><span className='font-semibold text-gray-600'>IMPA: </span>{product.cod_prod}</p>
                     </div>
                     <BackHomeButton />

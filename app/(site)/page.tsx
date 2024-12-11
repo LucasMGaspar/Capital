@@ -15,17 +15,15 @@ import { useFilterProductStore } from "@/store/filterProductStore";
 import useCurrencyStore from "@/store/useCurrencyStore";
 import { FolderOpen, Package } from "lucide-react";
 import { revalidatePath } from "next/cache";
-import { PriceCalculed } from '@/components/PriceCalculed';
+import { PriceCalculed } from "@/components/PriceCalculed";
 import Image from "next/image";
 import { updateCurrency } from "@/actions/currency";
-import { UpdateExchangeRateInput } from "@/components/admin/UpdateExchangeRate";
-import { Decimal } from "@prisma/client/runtime/library";
 import AddProductToCartButton from "@/components/site/ProductCard/AddToCartButton";
 import ClearSearchButton from "@/components/ClearSearchButton";
 
 // Função para analisar o código IMPA
 function parseImpaCode(code: string) {
-  const cleanedCode = code.replace(/\s+/g, '');
+  const cleanedCode = code.replace(/\s+/g, "");
   if (cleanedCode.length !== 6) {
     return null;
   }
@@ -40,11 +38,8 @@ export type ProductsList = {
   name: string;
   cod_prod: string;
   price: string;
-  costPrice: Decimal;
-  profitRate: Decimal;
   image: string;
   category: string;
-  description: string;
   isFeatured: boolean;
 };
 
@@ -54,7 +49,7 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
   // Formatar os preços
   const formattedProducts = allProducts.map((product) => {
     let priceString = product.price.toFixed(2);
-    priceString = priceString.replace('.', ',');
+    priceString = priceString.replace(".", ",");
     return {
       ...product,
       price: priceString,
@@ -66,7 +61,7 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
 
   // Obter o cod_prod da query e dividir por vírgulas para múltiplos códigos
   const codProdQuery = searchParams.cod_prod?.trim();
-  const codProdArray = codProdQuery ? codProdQuery.split(',').map(code => code.trim()) : [];
+  const codProdArray = codProdQuery ? codProdQuery.split(",").map((code) => code.trim()) : [];
 
   // Lógica de filtragem atualizada com mensagens
   let filteredProducts: ProductsList[] = [];
@@ -75,7 +70,7 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
   if (codProdArray.length > 0) {
     const filteredProductsMap = new Map<string, ProductsList>();
 
-    codProdArray.forEach(code => {
+    codProdArray.forEach((code) => {
       const parsedCode = parseImpaCode(code);
       if (!parsedCode) {
         searchMessages.push(`Código IMPA inválido: "${code}".`);
@@ -83,14 +78,14 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
       }
 
       // Encontrar produtos com correspondência exata
-      const exactMatches = formattedProducts.filter(product => product.cod_prod === code);
+      const exactMatches = formattedProducts.filter((product) => product.cod_prod === code);
       if (exactMatches.length > 0) {
-        exactMatches.forEach(product => {
+        exactMatches.forEach((product) => {
           filteredProductsMap.set(product.id, product);
         });
       } else {
         // Não há correspondência exata, encontrar produtos próximos
-        const similarProducts = formattedProducts.filter(product => {
+        const similarProducts = formattedProducts.filter((product) => {
           const productCode = parseImpaCode(product.cod_prod);
           if (!productCode) return false;
           return productCode.category === parsedCode.category && productCode.type === parsedCode.type;
@@ -108,7 +103,7 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
           });
 
           // Adicionar os produtos mais próximos
-          similarProducts.slice(0, 3).forEach(product => {
+          similarProducts.slice(0, 3).forEach((product) => {
             filteredProductsMap.set(product.id, product);
           });
         } else {
@@ -136,7 +131,7 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
     try {
       await updateCurrency({ dollar: newDollarValue });
       setExchangeRate(newDollarValue);
-      revalidatePath('/');
+      revalidatePath("/");
     } catch (error) {
       console.error("Failed to update currency:", error);
     }
@@ -149,11 +144,8 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
       </header>
       <main className="flex flex-col items-center">
         <SheetCategoriesSidebar />
-        
 
         {/* Formulário de Pesquisa */}
-       
-        
 
         {/* Botão para Limpar a Pesquisa */}
         {searchParams.cod_prod && (
@@ -175,7 +167,7 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
           <h2 className="text-primary font-semibold">
             {codProdQuery ? `Resultado para "${codProdQuery}"` : filter}
           </h2>
-          {session?.user.role === 'ADMIN' ? (
+          {session?.user.role === "ADMIN" ? (
             <div className="flex flex-col items-center lg:items-end gap-2 lg:gap-5 mt-5 lg:mt-0">
               <span className="flex items-center gap-1 text-lg">
                 <span className="font-bold mx-1">{categories.length}</span>
@@ -187,17 +179,6 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
                 <Package />
                 Produtos
               </span>
-              <form
-                className="flex justify-center lg:justify-end gap-1 text-lg"
-                action={serverActionToUpdateExchangeRate}
-              >
-                <div className="flex flex-col gap-2 w-1/3">
-                  <UpdateExchangeRateInput />
-                  <Button type="submit" className="bg-primary text-white">
-                    Taxa do Dólar
-                  </Button>
-                </div>
-              </form>
               <AddProductButton />
             </div>
           ) : null}
