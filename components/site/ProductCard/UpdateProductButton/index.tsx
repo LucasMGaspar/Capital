@@ -1,6 +1,6 @@
 "use client";
 
-import { getProductList, updateProduct } from "@/actions/product";
+import { updateProduct } from "@/actions/product";
 import { ProductsList } from "@/app/(site)/page";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { categories } from "@/lib/categories";
 import { useState } from "react";
 
@@ -28,30 +27,18 @@ export default function UpdateProductButton({
   product,
 }: UpdateProductButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [costPrice, setCostPrice] = useState(
-    parseFloat(product.costPrice.toString())
-  );
-  const [profitRate, setProfitRate] = useState(0);
 
   function handleUpdateProduct(event: any) {
     event.preventDefault();
     const formData = new FormData(event.target);
     const price = formData.get("price") as string;
     const formattedPrice = parseFloat(price.replace(",", ".")); // Converte para número
-    const profitRateValue =
-      parseFloat(formData.get("profitRate") as string) / 100;
-    const formattedPriceWithProfit = parseFloat(
-      (formattedPrice * (1 + profitRateValue)).toFixed(2)
-    ); // Garante que seja um número
 
-    if (formattedPrice > 0 && profitRateValue > 0) {
+    if (formattedPrice > 0) {
       updateProduct(product.id, {
         name: formData.get("name") as string,
         cod_prod: formData.get("cod_prod") as string,
-        price: formattedPriceWithProfit, // Agora definitivamente um número
-        costPrice: formattedPrice, // Também um número
-        profitRate: profitRateValue, // Já é número
-        description: formData.get("description") as string,
+        price: formattedPrice, // Agora definitivamente um número
         isFeatured: Boolean(formData.get("isFeatured")),
         category: formData.get("category") as string,
       });
@@ -121,43 +108,14 @@ export default function UpdateProductButton({
                   </select>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="description" className="text-right">
-                    Description
-                  </Label>
-                  <Textarea
-                    id="description"
-                    name="description"
-                    defaultValue={product.description}
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="price" className="text-right">
                     Price R$
                   </Label>
                   <Input
                     id="price"
                     name="price"
-                    defaultValue={product.costPrice.toString()}
+                    defaultValue={product.price.toString()}
                     className="col-span-3"
-                    onChange={(e) => setCostPrice(parseFloat(e.target.value))}
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="profitRate" className="text-right">
-                    Profit (%)
-                  </Label>
-                  <Input
-                    id="profitRate"
-                    name="profitRate"
-                    defaultValue={(
-                      parseFloat(product.profitRate.toString()) * 100 -
-                      100
-                    ).toFixed(0)}
-                    className="col-span-3"
-                    onChange={(e) =>
-                      setProfitRate(parseFloat(e.target.value) / 100)
-                    }
                   />
                 </div>
                 <div className="grid grid-cols-2 items-center gap-4">
@@ -172,14 +130,6 @@ export default function UpdateProductButton({
                     defaultChecked={product.isFeatured}
                   />
                 </div>
-                {costPrice > 0 && !isNaN(profitRate) && profitRate > 0 && (
-                  <div className="grid mt-3 gap-[2px] items-center font-semibold">
-                    <span className="my-2 text-lg w-full text-right">
-                      <span className="font-normal block">Total Price:</span> R${" "}
-                      {(costPrice * (1 + profitRate)).toFixed(2)}
-                    </span>
-                  </div>
-                )}
               </div>
               <DialogFooter>
                 <Button type="submit">Save</Button>

@@ -1,20 +1,5 @@
 export const categories = [
-    "ANTI-PIRACY",
-    "BATTERIES",
-    "CLEANING",
-    "DECK STORES",
-    "EMERGENCY FOOD",
-    "FIREFIGHTING",
-    "HOME APPLIANCES",
-    "HOSPITALITY",
-    "LASHING",
-    "MARINE PYROTECHNICS",
-    "PAINT FOR DECK",
-    "PAINT FOR ENGINE",
-    "PAINTING EQUIPMENTS",
-    "PROTECTION CLOTHES",
-    "SAFETY",
-    "SAFETY EQUIPMENTS",
-    "STATIONERY",
-    "TAPES",
+    "Alcoólicas",
+    "Não Alcoólicas"
+   
 ];

@@ -12,7 +12,6 @@ enum UserRole {
   ADMIN
 }
 
-// Pode manter o model User caso use em outras partes da aplicação, não é necessário apagar
 model User {
   id                     String    @id @default(cuid())
   name                   String
@@ -77,18 +76,15 @@ model ResetPasswordToken {
 }
 
 model Product {
-  id          String   @id @default(cuid())
-  cod_prod    String   @unique
-  name        String   @db.VarChar(80)
-  price       Decimal
-  costPrice   Decimal
-  image       String
-  category    String
-  description String
-  isFeatured  Boolean
-  profitRate  Decimal
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(cuid())
+  cod_prod   String   @unique
+  name       String   @db.VarChar(80)
+  price      Decimal
+  image      String
+  category   String
+  isFeatured Boolean
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model Currency {
@@ -96,7 +92,6 @@ model Currency {
   dollar Decimal @default(5.60)
 }
 
-// Novo model Cliente
 model Cliente {
   id_cliente Int    @id @default(autoincrement())
   cpf        String
@@ -107,7 +102,6 @@ model Cliente {
   faturas Fatura[]
 }
 
-// Ajustamos a fatura para se relacionar a Cliente
 model Fatura {
   id_fatura                Int       @id @default(autoincrement())
   valor_final              Float
