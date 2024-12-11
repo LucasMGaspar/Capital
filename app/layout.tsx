@@ -12,7 +12,7 @@ import CurrencyWrapper from "@/components/CurrencyWrapper";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-	title: "NavSupply E-commerce",
+	title: "NaCapital",
 	description: "Products",
 };
 
