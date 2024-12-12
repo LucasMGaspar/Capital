@@ -45,7 +45,7 @@ export default function CartClient() {
     setError(null);
 
     try {
-      const response = await fetch("/api/orders", {
+      const response = await fetch("/api/createPayment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
