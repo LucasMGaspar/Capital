@@ -4,7 +4,7 @@ import Link from "next/link";
 export default async function Contact() {
   return (
     <div className="flex min-h-screen w-full flex-col">
-      <header className="sticky top-0 flex h-20 items-center gap-4 bg-primary px-4 md:px-6 z-10">
+      <header className="sticky top-0 flex h-20 items-center gap-4 bg-[#1c345c] px-4 md:px-6 z-10">
         <Navbar />
       </header>
       <div className="flex flex-col justify-center items-center w-full mt-20 m-auto text-center px-4">
