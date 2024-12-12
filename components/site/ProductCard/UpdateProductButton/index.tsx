@@ -28,30 +28,45 @@ export default function UpdateProductButton({
 }: UpdateProductButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  function handleUpdateProduct(event: any) {
+  function fileToBase64(file: File) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+  }
+
+  async function handleUpdateProduct(event: any) {
     event.preventDefault();
     const formData = new FormData(event.target);
-    const price = formData.get("price") as string;
-    const formattedPrice = parseFloat(price.replace(",", ".")); // Converte para número
-
+    const priceString = formData.get("price") as string;
+    const formattedPrice = parseFloat(priceString.replace(",", "."));
     const uploadedImage = formData.get("image") as File;
-    let imageUrl = product.image; // Reutiliza a imagem existente, caso nenhuma nova seja enviada
 
-    // Se o usuário enviar uma nova imagem
+    let imageData = product.image; // Reutiliza a imagem existente, caso nenhuma nova seja enviada
+
+    // Se o usuário enviar uma nova imagem, convertemos para Base64
     if (uploadedImage && uploadedImage.size > 0) {
-      imageUrl = URL.createObjectURL(uploadedImage); // Simulação: em produção, faça upload para um servidor
+      try {
+        const base64Image = await fileToBase64(uploadedImage);
+        imageData = base64Image as string;
+      } catch (error) {
+        console.error("Erro ao converter imagem para Base64:", error);
+      }
     }
 
     if (formattedPrice > 0) {
-      updateProduct(product.id, {
+      await updateProduct(product.id, {
         name: formData.get("name") as string,
         cod_prod: formData.get("cod_prod") as string,
-        price: formattedPrice, // Agora definitivamente um número
+        price: formattedPrice,
         isFeatured: Boolean(formData.get("isFeatured")),
         category: formData.get("category") as string,
-        image: imageUrl, // Incluindo a imagem no objeto
+        image: imageData, 
       });
     }
+
     setIsOpen(false);
   }
 
