@@ -1,8 +1,6 @@
-// app/api/payment/webhook/route.ts
+// app/api/payment/ipn/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
-import { MercadoPagoConfig, Payment } from 'mercadopago';
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,12 +10,18 @@ export async function POST(req: NextRequest) {
     const paymentId = searchParams.get('id');
 
     // Log dos parâmetros recebidos para depuração
-    console.log("Webhook recebido com parâmetros:", { topic, paymentId });
+    console.log("IPN recebido com parâmetros:", { topic, paymentId });
+
+    // Responder com 200 OK
+    return NextResponse.json({ message: 'OK' }, { status: 200 });
+
+    /*
+    // Início da lógica operacional comentada
 
     // Verificar se os parâmetros existem
     if (!topic || !paymentId) {
-      console.error("Webhook recebido sem 'topic' ou 'id':", { topic, paymentId });
-      return NextResponse.json({ message: 'Parâmetros inválidos recebidos via webhook' }, { status: 400 });
+      console.error("IPN recebido sem 'topic' ou 'id':", { topic, paymentId });
+      return NextResponse.json({ message: 'Parâmetros inválidos recebidos via IPN' }, { status: 400 });
     }
 
     // Inicializar cliente do Mercado Pago
@@ -43,8 +47,8 @@ export async function POST(req: NextRequest) {
       console.log("orderId:", orderId);
 
       if (isNaN(orderId)) {
-        console.error("Pedido inválido via webhook:", externalReference);
-        return NextResponse.json({ message: 'Pedido inválido via webhook' }, { status: 400 });
+        console.error("Pedido inválido via IPN:", externalReference);
+        return NextResponse.json({ message: 'Pedido inválido via IPN' }, { status: 400 });
       }
 
       // Atualizar pedido para 'paid'
@@ -70,13 +74,17 @@ export async function POST(req: NextRequest) {
         console.log(`Estoque do produto ${item.productId} decrementado em ${item.quantity}`);
       }
 
-      return NextResponse.json({ message: 'Pedido atualizado com sucesso via webhook' }, { status: 200 });
+      return NextResponse.json({ message: 'Pedido atualizado com sucesso via IPN' }, { status: 200 });
     }
 
     console.log("Pagamento não aprovado ainda:", paymentResponse.status);
-    return NextResponse.json({ message: 'Pagamento não aprovado ainda via webhook' }, { status: 200 });
+    return NextResponse.json({ message: 'Pagamento não aprovado ainda via IPN' }, { status: 200 });
+
+    // Fim da lógica operacional comentada
+    */
+
   } catch (error: any) {
-    console.error("Erro na rota /api/payment/webhook:", error);
+    console.error("Erro na rota /api/payment/ipn:", error);
     return NextResponse.json({ error: "Erro interno no servidor" }, { status: 500 });
   }
 }
