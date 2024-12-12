@@ -22,12 +22,23 @@ import React, { useState } from "react";
 export default function AddProductButton() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isAlertDisplayed, setIsAlertDisplayed] = useState(false);
+  const [stockError, setStockError] = useState<string | null>(null);
 
-  const handleSubmit = (event: any) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsAlertDisplayed(false);
-    const formData = new FormData(event.target);
+    setStockError(null);
+    const formData = new FormData(event.currentTarget);
     const file = formData.get("image");
+
+    // Obter e validar a quantidade em estoque
+    const stockValue = formData.get("stock_quantity") as string;
+    const stock = parseInt(stockValue, 10);
+
+    if (isNaN(stock) || stock < 0) {
+      setStockError("A quantidade em estoque deve ser um número válido e positivo.");
+      return;
+    }
 
     fileToBase64(file)
       .then((base64Image) => {
@@ -41,18 +52,24 @@ export default function AddProductButton() {
           price: formattedPrice, // Agora definitivamente um número
           category: formData.get("category") as string,
           isFeatured: Boolean(formData.get("isFeatured")),
+          stock_quantity: stock, // Adiciona a quantidade em estoque
         };
 
         if (formattedPrice > 0) {
-          saveProduct(product).then(() => {
-            setIsDialogOpen(false); // Fechar o Dialog quando o produto for salvo com sucesso
-          });
+          saveProduct(product)
+            .then(() => {
+              setIsDialogOpen(false); // Fechar o Dialog quando o produto for salvo com sucesso
+            })
+            .catch((error) => {
+              console.error("Erro ao salvar o produto:", error);
+              setIsAlertDisplayed(true);
+            });
         } else {
           setIsAlertDisplayed(true);
         }
       })
       .catch((error) => {
-        console.error("Error converting file to Base64:", error);
+        console.error("Erro ao converter o arquivo para Base64:", error);
       });
   };
 
@@ -72,20 +89,20 @@ export default function AddProductButton() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] lg:max-w-[450px]">
         <DialogHeader>
-          <DialogTitle>Cadastro Produto</DialogTitle>
+          <DialogTitle>Cadastro de Produto</DialogTitle>
           <DialogDescription>
-           
+            Preencha os detalhes do produto para adicioná-lo ao estoque.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-2 gap-4 py-3">
             <div className="grid grid-cols-2 items-center">
-              <Label htmlFor="cod_prod">Codigo</Label>
+              <Label htmlFor="cod_prod">Código</Label>
               <Input
                 id="cod_prod"
                 name="cod_prod"
                 type="text"
-                placeholder=""
+                placeholder="Código do Produto"
                 className="col-span-3"
                 required
               />
@@ -116,6 +133,18 @@ export default function AddProductButton() {
                 required
               />
             </div>
+            <div className="grid grid-cols-2 items-center">
+              <Label htmlFor="stock_quantity">Estoque</Label>
+              <Input
+                id="stock_quantity"
+                name="stock_quantity"
+                type="number"
+                min="0"
+                placeholder="Quantidade em estoque"
+                className="col-span-3"
+                required
+              />
+            </div>
           </div>
           <div>
             <div className="grid grid-cols-2 items-center">
@@ -124,7 +153,7 @@ export default function AddProductButton() {
                 id="name"
                 name="name"
                 type="text"
-                placeholder=""
+                placeholder="Nome do Produto"
                 className="col-span-3"
                 required
               />
@@ -141,7 +170,7 @@ export default function AddProductButton() {
               />
             </div>
             <div className="flex mt-4 gap-3 w-full items-center">
-              <Label htmlFor="isFeatured">Mais vendidos?</Label>
+              <Label htmlFor="isFeatured">Mais Vendidos?</Label>
               <Checkbox
                 id="isFeatured"
                 name="isFeatured"
@@ -152,10 +181,17 @@ export default function AddProductButton() {
           {isAlertDisplayed && (
             <Alert className="mt-5" variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
+              <AlertTitle>Erro</AlertTitle>
               <AlertDescription>
-                Price provided is invalid.
+                Houve um problema ao salvar o produto. Verifique os dados e tente novamente.
               </AlertDescription>
+            </Alert>
+          )}
+          {stockError && (
+            <Alert className="mt-5" variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Erro de Estoque</AlertTitle>
+              <AlertDescription>{stockError}</AlertDescription>
             </Alert>
           )}
           <DialogFooter className="mt-5">
