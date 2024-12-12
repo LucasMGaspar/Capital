@@ -1,6 +1,8 @@
 // app/api/payment/ipn/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
+import { MercadoPagoConfig, Payment } from 'mercadopago';
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,16 +14,11 @@ export async function POST(req: NextRequest) {
     // Log dos parâmetros recebidos para depuração
     console.log("IPN recebido com parâmetros:", { topic, paymentId });
 
-    // Responder com 200 OK
-    return NextResponse.json({ message: 'OK' }, { status: 200 });
-
-    /*
-    // Início da lógica operacional comentada
-
     // Verificar se os parâmetros existem
     if (!topic || !paymentId) {
       console.error("IPN recebido sem 'topic' ou 'id':", { topic, paymentId });
-      return NextResponse.json({ message: 'Parâmetros inválidos recebidos via IPN' }, { status: 400 });
+      // Retorna 200 OK mesmo em caso de parâmetros inválidos para evitar reenvios
+      return NextResponse.json({ message: 'OK' }, { status: 200 });
     }
 
     // Inicializar cliente do Mercado Pago
@@ -48,7 +45,8 @@ export async function POST(req: NextRequest) {
 
       if (isNaN(orderId)) {
         console.error("Pedido inválido via IPN:", externalReference);
-        return NextResponse.json({ message: 'Pedido inválido via IPN' }, { status: 400 });
+        // Retorna 200 OK mesmo em caso de pedido inválido
+        return NextResponse.json({ message: 'OK' }, { status: 200 });
       }
 
       // Atualizar pedido para 'paid'
@@ -73,18 +71,18 @@ export async function POST(req: NextRequest) {
         });
         console.log(`Estoque do produto ${item.productId} decrementado em ${item.quantity}`);
       }
-
-      return NextResponse.json({ message: 'Pedido atualizado com sucesso via IPN' }, { status: 200 });
+    } else {
+      console.log("Pagamento não aprovado ainda:", paymentResponse.status);
     }
 
-    console.log("Pagamento não aprovado ainda:", paymentResponse.status);
-    return NextResponse.json({ message: 'Pagamento não aprovado ainda via IPN' }, { status: 200 });
-
-    // Fim da lógica operacional comentada
-    */
+    // Retorna 200 OK independentemente do processamento
+    return NextResponse.json({ message: 'OK' }, { status: 200 });
 
   } catch (error: any) {
+    // Log de erro para depuração
     console.error("Erro na rota /api/payment/ipn:", error);
-    return NextResponse.json({ error: "Erro interno no servidor" }, { status: 500 });
+
+    // Sempre retorna 200 OK para evitar reenvios
+    return NextResponse.json({ message: 'OK' }, { status: 200 });
   }
 }
