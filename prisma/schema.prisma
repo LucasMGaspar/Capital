@@ -76,15 +76,18 @@ model ResetPasswordToken {
 }
 
 model Product {
-  id         String   @id @default(cuid())
-  cod_prod   String   @unique
-  name       String   @db.VarChar(80)
-  price      Decimal
-  image      String
-  category   String
-  isFeatured Boolean
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id             String   @id @default(cuid())
+  cod_prod       String   @unique
+  name           String   @db.VarChar(80)
+  price          Decimal
+  image          String
+  category       String
+  isFeatured     Boolean
+  stock_quantity Int      @default(0) // estoque do produto
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  orderItems OrderItem[]
 }
 
 model Currency {
@@ -135,4 +138,27 @@ model Pagamento {
   fatura   Fatura? @relation(fields: [faturaId], references: [id_fatura])
 
   @@map("pagamento")
+}
+
+// Novos modelos para ordens e itens
+
+model Order {
+  id        Int      @id @default(autoincrement())
+  status    String // 'pending', 'paid', etc.
+  paymentId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orderItems OrderItem[]
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  productId String
+  quantity  Int
+  unitPrice Decimal
+
+  order   Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
 }

@@ -33,19 +33,25 @@ export default function CartClient() {
 
   const totalValue = calculateTotal();
 
+  // Montando o array de items para a rota /api/orders
+  const items = parsedCart.map((product) => ({
+    productId: product.id,
+    quantity: product.quantity,
+  }));
+
   // Função para lidar com o botão "COMPRAR"
   const handlePurchase = async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await fetch("/api/createPayment", {
+      const response = await fetch("/api/orders", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          valor_final: totalValue,
+          items
         }),
       });
 
@@ -56,11 +62,11 @@ export default function CartClient() {
 
       const data = await response.json();
 
-      if (data.paymentLink) {
-        // Redirecionar para o link de pagamento
-        window.location.href = data.paymentLink;
+      if (data.init_point) {
+        // Redirecionar para o link de pagamento (init_point)
+        window.location.href = data.init_point;
       } else {
-        throw new Error("Link de pagamento não encontrado.");
+        throw new Error("Link de pagamento (init_point) não encontrado.");
       }
     } catch (err: any) {
       setError(err.message || "Erro inesperado.");
