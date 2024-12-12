@@ -9,10 +9,10 @@ export default async function Contact() {
       </header>
       <div className="flex flex-col justify-center items-center w-full mt-20 m-auto text-center px-4">
         <h2 className="text-3xl font-bold text-primary mb-8">
-          Pagamento realizado com sucesso!
+          
         </h2>
         <p className="text-lg mb-12">
-          Obrigado pela sua compra. Seu pagamento foi confirmado com sucesso.
+        Continuar comprando?
         </p>
         <Link href="/" passHref>
           <button className="px-6 py-3 bg-[#cf964d] text-white rounded-md hover:bg-[#b7803c] transition-colors">
