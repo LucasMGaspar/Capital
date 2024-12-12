@@ -59,7 +59,6 @@ export async function POST(req: NextRequest) {
         };
       }),
       external_reference: String(order.id),
-      notification_url: `${process.env.BASE_URL}/api/payment/webhook`,
       payment_methods: {
         default_payment_method_id: "pix",
         excluded_payment_types: [
