@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
         { id: "credit_card" },
         { id: "debit_card" },
         { id: "ticket" },
-        { id: "bank_transfer" },
+        //{ id: "bank_transfer" },
         { id: "atm" }
       ]
     }
