@@ -197,7 +197,7 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
                   <div className="text-lg break-words h-[130px] text-primary hover:underline cursor-pointer">
                     <ProductName name={product.name} id={product.id} />
                   </div>
-                  <div className="text-[#cf964d] text-lg font-bold mb-4">
+                  <div className="text-[#cf964d] text-lg font-bold mb-4 text-center">
                     <PriceCalculed price={product.price} />
                   </div>
                   <div className="flex flex-col gap-5">
