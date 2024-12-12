@@ -21,7 +21,6 @@ import { updateCurrency } from "@/actions/currency";
 import AddProductToCartButton from "@/components/site/ProductCard/AddToCartButton";
 import ClearSearchButton from "@/components/ClearSearchButton";
 
-// Função para analisar o código IMPA
 function parseImpaCode(code: string) {
   const cleanedCode = code.replace(/\s+/g, "");
   if (cleanedCode.length !== 6) {
@@ -41,12 +40,12 @@ export type ProductsList = {
   image: string;
   category: string;
   isFeatured: boolean;
+  stock_quantity: number; // Adicionado o campo de estoque
 };
 
 export default async function Home({ searchParams }: { searchParams: { cod_prod?: string } }) {
   const allProducts = await getProductList();
 
-  // Formatar os preços
   const formattedProducts = allProducts.map((product) => {
     let priceString = product.price.toFixed(2);
     priceString = priceString.replace(".", ",");
@@ -56,16 +55,12 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
     };
   });
 
-  // Obter os filtros atuais
   const filter = useFilterProductStore.getState().selectedFilter;
-
-  // Obter o cod_prod da query e dividir por vírgulas para múltiplos códigos
   const codProdQuery = searchParams.cod_prod?.trim();
   const codProdArray = codProdQuery ? codProdQuery.split(",").map((code) => code.trim()) : [];
 
-  // Lógica de filtragem atualizada com mensagens
   let filteredProducts: ProductsList[] = [];
-  let searchMessages: string[] = []; // Array para armazenar mensagens
+  let searchMessages: string[] = [];
 
   if (codProdArray.length > 0) {
     const filteredProductsMap = new Map<string, ProductsList>();
@@ -74,17 +69,15 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
       const parsedCode = parseImpaCode(code);
       if (!parsedCode) {
         searchMessages.push(`Código IMPA inválido: "${code}".`);
-        return; // Ignora códigos inválidos
+        return;
       }
 
-      // Encontrar produtos com correspondência exata
       const exactMatches = formattedProducts.filter((product) => product.cod_prod === code);
       if (exactMatches.length > 0) {
         exactMatches.forEach((product) => {
           filteredProductsMap.set(product.id, product);
         });
       } else {
-        // Não há correspondência exata, encontrar produtos próximos
         const similarProducts = formattedProducts.filter((product) => {
           const productCode = parseImpaCode(product.cod_prod);
           if (!productCode) return false;
@@ -93,16 +86,11 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
 
         if (similarProducts.length > 0) {
           searchMessages.push(`Nenhum produto encontrado para "${code}". Mostrando produtos similares.`);
-          // Ordenar os produtos similares pela diferença no detalhe
           similarProducts.sort((a, b) => {
             const aDetail = parseImpaCode(a.cod_prod)!.detail;
             const bDetail = parseImpaCode(b.cod_prod)!.detail;
-            const detailDifferenceA = Math.abs(aDetail - parsedCode.detail);
-            const detailDifferenceB = Math.abs(bDetail - parsedCode.detail);
-            return detailDifferenceA - detailDifferenceB;
+            return Math.abs(aDetail - parsedCode.detail) - Math.abs(bDetail - parsedCode.detail);
           });
-
-          // Adicionar os produtos mais próximos
           similarProducts.slice(0, 3).forEach((product) => {
             filteredProductsMap.set(product.id, product);
           });
@@ -114,7 +102,6 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
 
     filteredProducts = Array.from(filteredProductsMap.values());
   } else {
-    // Aplicar o filtro existente
     filteredProducts = formattedProducts
       .filter((product) => {
         return filter === "Produtos" ? product.isFeatured : product.category === filter;
@@ -145,16 +132,12 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
       <main className="flex flex-col items-center">
         <SheetCategoriesSidebar />
 
-        {/* Formulário de Pesquisa */}
-
-        {/* Botão para Limpar a Pesquisa */}
         {searchParams.cod_prod && (
           <div className="flex justify-center mb-8">
             <ClearSearchButton />
           </div>
         )}
 
-        {/* Exibir mensagens de busca */}
         {searchMessages.length > 0 && (
           <div className="max-w-7xl w-full px-4 mb-8">
             {searchMessages.map((message, index) => (
@@ -167,7 +150,7 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
           <h2 className="text-primary font-semibold">
             {codProdQuery ? `Resultado para "${codProdQuery}"` : filter}
           </h2>
-          {session?.user.role === "ADMIN" ? (
+          {session?.user.role === "ADMIN" && (
             <div className="flex flex-col items-center lg:items-end gap-2 lg:gap-5 mt-5 lg:mt-0">
               <span className="flex items-center gap-1 text-lg">
                 <span className="font-bold mx-1">{categories.length}</span>
@@ -181,10 +164,9 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
               </span>
               <AddProductButton />
             </div>
-          ) : null}
+          )}
         </div>
 
-        {/* Renderização dos produtos */}
         <div className="flex flex-wrap max-w-[1280px] w-full m-auto gap-10 mt-16 justify-center items-center">
           {filteredProducts.length > 0 ? (
             filteredProducts.map((product: ProductsList) => (
@@ -199,6 +181,9 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
                   </div>
                   <div className="text-[#cf964d] text-lg font-bold mb-4 text-center">
                     <PriceCalculed price={product.price} />
+                  </div>
+                  <div className="text-gray-500 text-sm text-center mb-4">
+                    Estoque: <span className="font-bold">{product.stock_quantity}</span>
                   </div>
                   <div className="flex flex-col gap-5">
                     <AddProductToCartButton userRole={session?.user.role} product={product} />

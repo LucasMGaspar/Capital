@@ -42,9 +42,17 @@ export default function UpdateProductButton({
     const formData = new FormData(event.target);
     const priceString = formData.get("price") as string;
     const formattedPrice = parseFloat(priceString.replace(",", "."));
+    const stockQuantityString = formData.get("stock_quantity") as string;
+    const stockQuantity = parseInt(stockQuantityString, 10);
     const uploadedImage = formData.get("image") as File;
 
     let imageData = product.image; // Reutiliza a imagem existente, caso nenhuma nova seja enviada
+
+    // Validação do estoque
+    if (isNaN(stockQuantity) || stockQuantity < 0) {
+      alert("A quantidade em estoque deve ser um número válido e positivo.");
+      return;
+    }
 
     // Se o usuário enviar uma nova imagem, convertemos para Base64
     if (uploadedImage && uploadedImage.size > 0) {
@@ -63,7 +71,8 @@ export default function UpdateProductButton({
         price: formattedPrice,
         isFeatured: Boolean(formData.get("isFeatured")),
         category: formData.get("category") as string,
-        image: imageData, 
+        stock_quantity: stockQuantity, // Adiciona o estoque ao objeto atualizado
+        image: imageData,
       });
     }
 
@@ -87,7 +96,9 @@ export default function UpdateProductButton({
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>Editar produto</DialogTitle>
-              <DialogDescription>Atualize as informações do produto.</DialogDescription>
+              <DialogDescription>
+                Atualize as informações do produto.
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleUpdateProduct}>
               <div className="grid gap-4 py-4">
@@ -139,6 +150,18 @@ export default function UpdateProductButton({
                     id="price"
                     name="price"
                     defaultValue={product.price.toString()}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="stock_quantity" className="text-right">
+                    Estoque
+                  </Label>
+                  <Input
+                    id="stock_quantity"
+                    name="stock_quantity"
+                    type="number"
+                    defaultValue={product.stock_quantity.toString()}
                     className="col-span-3"
                   />
                 </div>
