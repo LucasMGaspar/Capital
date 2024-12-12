@@ -16,6 +16,13 @@ export default function AdminForm() {
       .then((base64Image) => {
         const priceString = formData.get("price") as string;
         const formattedPrice = parseFloat(priceString.replace(",", "."));
+        const stockQuantityString = formData.get("stock_quantity") as string;
+        const stockQuantity = parseInt(stockQuantityString, 10);
+
+        if (isNaN(stockQuantity) || stockQuantity < 0) {
+          alert("Invalid stock quantity. It must be a positive number.");
+          return;
+        }
 
         const product: ProductProps = {
           name: formData.get("name") as string,
@@ -24,6 +31,7 @@ export default function AdminForm() {
           price: formattedPrice, // Garantido como número
           category: formData.get("category") as string,
           isFeatured: Boolean(formData.get("isFeatured")),
+          stock_quantity: stockQuantity, // Adiciona o controle de estoque
         };
 
         if (formattedPrice > 0) {
@@ -106,6 +114,23 @@ export default function AdminForm() {
             id="price"
             className="input input-bordered input-primary border w-full max-w-xs p-2"
             placeholder="0,00"
+            required
+          />
+        </div>
+        <div className="mb-5 w-full px-8">
+          <label
+            htmlFor="stock_quantity"
+            className="block text-md font-medium text-gray-600"
+          >
+            Estoque
+          </label>
+          <input
+            type="number"
+            name="stock_quantity"
+            id="stock_quantity"
+            className="input input-bordered input-primary border w-full max-w-xs p-2"
+            placeholder="Quantidade em estoque"
+            min="0"
             required
           />
         </div>
