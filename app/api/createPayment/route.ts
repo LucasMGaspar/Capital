@@ -1,85 +1,94 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import prisma from '@/lib/prisma';
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 
 export async function POST(req: NextRequest) {
-  const { items } = await req.json();
-  // items = [{ productId: string, quantity: number }, ...]
+  try {
+    const { items } = await req.json();
 
-  // Buscar os produtos no banco
-  const productIds = items.map((i: any) => i.productId);
-  const products = await prisma.product.findMany({
-    where: { id: { in: productIds } }
-  });
-
-  // Verificar se todos os produtos foram encontrados e se tem estoque (opcional)
-  for (const item of items) {
-    const product = products.find(p => p.id === item.productId);
-    if (!product) {
-      return NextResponse.json({ error: `Produto ${item.productId} não encontrado` }, { status: 400 });
+    if (!items || items.length === 0) {
+      return NextResponse.json({ error: "Nenhum item enviado" }, { status: 400 });
     }
-    // (Opcional: Verificar se stock_quantity >= item.quantity)
-    // if (product.stock_quantity < item.quantity) {
-    //   return NextResponse.json({ error: `Estoque insuficiente para o produto ${product.name}` }, { status: 400 });
-    // }
-  }
 
-  // Criar o pedido (status pending)
-  const order = await prisma.order.create({
-    data: {
-      status: 'pending',
-      orderItems: {
-        create: items.map((item: any) => {
-          const product = products.find(p => p.id === item.productId)!;
-          return {
-            productId: product.id,
-            quantity: item.quantity,
-            unitPrice: product.price
-          };
-        })
+    const productIds = items.map((i: any) => i.productId);
+    const products = await prisma.product.findMany({
+      where: { id: { in: productIds } }
+    });
+
+    // Checar se todos os produtos foram encontrados
+    for (const item of items) {
+      const product = products.find(p => p.id === item.productId);
+      if (!product) {
+        return NextResponse.json({ error: `Produto ${item.productId} não encontrado` }, { status: 400 });
       }
-    },
-    include: { orderItems: true }
-  });
-
-  // Inicializar o cliente do Mercado Pago
-  const mpClient = new MercadoPagoConfig({
-    accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN!,
-    options: { timeout: 5000 }
-  });
-
-  const preferenceClient = new Preference(mpClient);
-
-  // Criar preferência somente para PIX
-  const preferenceBody = {
-    items: order.orderItems.map((orderItem) => {
-      const product = products.find(p => p.id === orderItem.productId)!;
-      return {
-        id: product.id, // Campo id obrigatório
-        title: product.name,
-        unit_price: Number(product.price), // conversão Decimal para number
-        quantity: orderItem.quantity
-      };
-    }),
-    external_reference: String(order.id),
-    notification_url: `${process.env.BASE_URL}/api/payment/webhook`,
-    payment_methods: {
-      default_payment_method_id: "pix",
-      excluded_payment_types: [
-        { id: "credit_card" },
-        { id: "debit_card" },
-        { id: "ticket" },
-        //{ id: "bank_transfer" },
-        { id: "atm" }
-      ]
     }
-  };
 
-  const preferenceResponse = await preferenceClient.create({ body: preferenceBody });
+    // Criar pedido no banco
+    const order = await prisma.order.create({
+      data: {
+        status: 'pending',
+        orderItems: {
+          create: items.map((item: any) => {
+            const product = products.find(p => p.id === item.productId)!;
+            return {
+              productId: product.id,
+              quantity: item.quantity,
+              unitPrice: product.price
+            };
+          })
+        }
+      },
+      include: { orderItems: true }
+    });
 
-  // Retorna a URL para redirecionar o usuário ao checkout PIX
-  return NextResponse.json({
-    orderId: order.id,
-    init_point: preferenceResponse.init_point
-  });
+    const mpClient = new MercadoPagoConfig({
+      accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN!,
+      options: { timeout: 5000 }
+    });
+
+    const preferenceClient = new Preference(mpClient);
+
+    const preferenceBody = {
+      items: order.orderItems.map((orderItem) => {
+        const product = products.find(p => p.id === orderItem.productId)!;
+        return {
+          id: product.id,
+          title: product.name,
+          unit_price: Number(product.price),
+          quantity: orderItem.quantity
+        };
+      }),
+      external_reference: String(order.id),
+      notification_url: `${process.env.BASE_URL}/api/payment/webhook`,
+      payment_methods: {
+        default_payment_method_id: "pix",
+        excluded_payment_types: [
+          { id: "credit_card" },
+          { id: "debit_card" },
+          { id: "ticket" },
+          { id: "atm" }
+          // Não removemos bank_transfer para permitir PIX
+        ]
+      },
+      payer: {
+        name: "Lucas",
+        surname: "Gaspar",
+        email: "lucasmanoel.g.g@gmail.com",
+        identification: {
+          type: "CPF",
+          number: "13975394617"
+        },
+      }
+    };
+
+    const preferenceResponse = await preferenceClient.create({ body: preferenceBody });
+
+    return NextResponse.json({
+      orderId: order.id,
+      init_point: preferenceResponse.init_point
+    });
+  } catch (error: any) {
+    console.error("Erro na rota /api/orders:", error);
+    return NextResponse.json({ error: "Erro interno no servidor" }, { status: 500 });
+  }
 }
