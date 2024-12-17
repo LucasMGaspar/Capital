@@ -48,17 +48,18 @@ export default function AddProductButton() {
         const product: ProductProps = {
           name: formData.get("name") as string,
           cod_prod: formData.get("cod_prod") as string,
-          image: base64Image as string, // Usa a imagem convertida para Base64
-          price: formattedPrice, // Agora definitivamente um número
+          image: base64Image as string,
+          price: formattedPrice,
           category: formData.get("category") as string,
           isFeatured: Boolean(formData.get("isFeatured")),
-          stock_quantity: stock, // Adiciona a quantidade em estoque
+          stock_quantity: stock,
+          unidade: formData.get("unidade") as "UNIDADE_1" | "UNIDADE_2", // Novo campo unidade
         };
 
         if (formattedPrice > 0) {
           saveProduct(product)
             .then(() => {
-              setIsDialogOpen(false); // Fechar o Dialog quando o produto for salvo com sucesso
+              setIsDialogOpen(false);
             })
             .catch((error) => {
               console.error("Erro ao salvar o produto:", error);
@@ -112,7 +113,7 @@ export default function AddProductButton() {
               <select
                 name="category"
                 id="category"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 col-span-3"
+                className="input input-bordered col-span-3"
                 required
               >
                 {categories.map((category: string, index) => (
@@ -145,6 +146,18 @@ export default function AddProductButton() {
                 required
               />
             </div>
+            <div className="grid grid-cols-2 items-center">
+              <Label htmlFor="unidade">Unidade</Label>
+              <select
+                name="unidade"
+                id="unidade"
+                className="input input-bordered col-span-3"
+                required
+              >
+                <option value="UNIDADE_1">Unidade 1</option>
+                <option value="UNIDADE_2">Unidade 2</option>
+              </select>
+            </div>
           </div>
           <div>
             <div className="grid grid-cols-2 items-center">
@@ -158,25 +171,18 @@ export default function AddProductButton() {
                 required
               />
             </div>
-            <div className="grid grid-cols-2 mt-3 gap-[2px] items-center">
+            <div className="grid grid-cols-2 mt-3 items-center">
               <Label htmlFor="image">Imagem</Label>
               <Input
                 id="image"
                 name="image"
                 type="file"
                 accept="image/*"
-                className="col-span-3 bg-slate-100 cursor-pointer"
+                className="col-span-3"
                 required
               />
             </div>
-            <div className="flex mt-4 gap-3 w-full items-center">
-              <Label htmlFor="isFeatured">Mais Vendidos?</Label>
-              <Checkbox
-                id="isFeatured"
-                name="isFeatured"
-                className="col-span-3"
-              />
-            </div>
+          
           </div>
           {isAlertDisplayed && (
             <Alert className="mt-5" variant="destructive">

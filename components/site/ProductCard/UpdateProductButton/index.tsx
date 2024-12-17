@@ -71,7 +71,8 @@ export default function UpdateProductButton({
         price: formattedPrice,
         isFeatured: Boolean(formData.get("isFeatured")),
         category: formData.get("category") as string,
-        stock_quantity: stockQuantity, // Adiciona o estoque ao objeto atualizado
+        stock_quantity: stockQuantity,
+        unidade: formData.get("unidade") as "UNIDADE_1" | "UNIDADE_2", // Inclui unidade
         image: imageData,
       });
     }
@@ -165,15 +166,28 @@ export default function UpdateProductButton({
                     className="col-span-3"
                   />
                 </div>
-                <div className="grid grid-cols-2 items-center gap-4">
-                  <Label htmlFor="isFeatured" className="">
-                    Destacar produto?
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="unidade" className="text-right">
+                    Unidade
                   </Label>
+                  <select
+                    id="unidade"
+                    name="unidade"
+                    className="input input-bordered border w-60 p-2"
+                    required
+                    defaultValue={product.unidade} // Define valor padrão
+                  >
+                    <option value="UNIDADE_1">Unidade 1</option>
+                    <option value="UNIDADE_2">Unidade 2</option>
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 items-center gap-4">
+                  <Label htmlFor="isFeatured">Destacar produto?</Label>
                   <Input
                     type="checkbox"
                     id="isFeatured"
                     name="isFeatured"
-                    className="col-span-1 w-4"
+                    className="w-4"
                     defaultChecked={product.isFeatured}
                   />
                 </div>

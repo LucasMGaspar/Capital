@@ -28,10 +28,11 @@ export default function AdminForm() {
           name: formData.get("name") as string,
           cod_prod: formData.get("cod_prod") as string,
           image: base64Image as string,
-          price: formattedPrice, // Garantido como número
+          price: formattedPrice,
           category: formData.get("category") as string,
           isFeatured: Boolean(formData.get("isFeatured")),
-          stock_quantity: stockQuantity, // Adiciona o controle de estoque
+          stock_quantity: stockQuantity,
+          unidade: formData.get("unidade") as "UNIDADE_1" | "UNIDADE_2", // Adiciona unidade
         };
 
         if (formattedPrice > 0) {
@@ -69,10 +70,7 @@ export default function AdminForm() {
       >
         {/* Campos do formulário */}
         <div className="mb-4 pt-2 w-full px-8">
-          <label
-            htmlFor="name"
-            className="block text-md font-medium text-gray-600"
-          >
+          <label htmlFor="name" className="block text-md font-medium text-gray-600">
             Nome do Produto
           </label>
           <textarea
@@ -87,10 +85,7 @@ export default function AdminForm() {
           />
         </div>
         <div className="w-full pb-5 px-8">
-          <label
-            htmlFor="cod_prod"
-            className="block text-md font-medium text-gray-600"
-          >
+          <label htmlFor="cod_prod" className="block text-md font-medium text-gray-600">
             Código do Produto
           </label>
           <input
@@ -102,10 +97,7 @@ export default function AdminForm() {
           />
         </div>
         <div className="mb-5 w-full px-8">
-          <label
-            htmlFor="price"
-            className="block text-md font-medium text-gray-600"
-          >
+          <label htmlFor="price" className="block text-md font-medium text-gray-600">
             Preço R$
           </label>
           <input
@@ -118,10 +110,7 @@ export default function AdminForm() {
           />
         </div>
         <div className="mb-5 w-full px-8">
-          <label
-            htmlFor="stock_quantity"
-            className="block text-md font-medium text-gray-600"
-          >
+          <label htmlFor="stock_quantity" className="block text-md font-medium text-gray-600">
             Estoque
           </label>
           <input
@@ -135,10 +124,21 @@ export default function AdminForm() {
           />
         </div>
         <div className="mb-5 w-full px-8">
-          <label
-            htmlFor="category"
-            className="block text-md font-medium text-gray-600"
+          <label htmlFor="unidade" className="block text-md font-medium text-gray-600">
+            Unidade
+          </label>
+          <select
+            name="unidade"
+            id="unidade"
+            className="input input-bordered input-primary border w-full max-w-xs p-2"
+            required
           >
+            <option value="UNIDADE_1">Unidade 1</option>
+            <option value="UNIDADE_2">Unidade 2</option>
+          </select>
+        </div>
+        <div className="mb-5 w-full px-8">
+          <label htmlFor="category" className="block text-md font-medium text-gray-600">
             Categoria do Produto
           </label>
           <select
@@ -155,10 +155,7 @@ export default function AdminForm() {
           </select>
         </div>
         <div className="mb-5 w-full px-8">
-          <label
-            htmlFor="isFeatured"
-            className="text-md font-medium text-gray-600"
-          >
+          <label htmlFor="isFeatured" className="text-md font-medium text-gray-600">
             Mark as featured product?
           </label>
           <input
@@ -169,10 +166,7 @@ export default function AdminForm() {
           />
         </div>
         <div className="mb-5">
-          <label
-            htmlFor="image"
-            className="block text-md font-medium text-gray-600"
-          >
+          <label htmlFor="image" className="block text-md font-medium text-gray-600">
             Foto do Produto
           </label>
           <input

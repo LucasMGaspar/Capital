@@ -1,5 +1,3 @@
-// "@/actions/product.ts"
-
 "use server";
 
 import { prisma } from "@/lib/db";
@@ -8,7 +6,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
-// Atualizando o ProductSchema para incluir stock_quantity
+// Enum Unidade
+const UnidadeEnum = z.enum(["UNIDADE_1", "UNIDADE_2"]);
+
+// Atualizando o ProductSchema para incluir unidade
 const ProductSchema = z.object({
   name: z.string().min(3, "O nome do produto deve ter pelo menos 3 caracteres."),
   cod_prod: z.string().nonempty("O código do produto é obrigatório."),
@@ -33,16 +34,18 @@ const ProductSchema = z.object({
       }
       return parsed;
     }),
+  unidade: UnidadeEnum, // Adicionando unidade
 });
 
 export type ProductProps = {
   name: string;
   cod_prod: string;
-  price: number; // Alterando para number
+  price: number;
   image: string;
   category: string;
   isFeatured: boolean;
-  stock_quantity: number; // Nova propriedade adicionada
+  stock_quantity: number;
+  unidade: "UNIDADE_1" | "UNIDADE_2";
 };
 
 type UpdatedProducts = {
@@ -52,16 +55,12 @@ type UpdatedProducts = {
   isFeatured: boolean;
   category: string;
   image: string;
-  stock_quantity: number; // Nova propriedade adicionada
+  stock_quantity: number;
+  unidade: "UNIDADE_1" | "UNIDADE_2";
 };
 
+// Função para criar um novo produto
 export const saveProduct = async (product: ProductProps) => {
-  // Validação adicional para o nome do produto
-  if (product.name.length > 80) {
-    console.log("Nome do produto muito longo.");
-    return { message: "Nome do produto muito longo." };
-  }
-
   try {
     await prisma.product.create({
       data: {
@@ -71,17 +70,18 @@ export const saveProduct = async (product: ProductProps) => {
         image: product.image,
         isFeatured: product.isFeatured,
         category: product.category,
-        stock_quantity: product.stock_quantity, // Incluindo stock_quantity
+        stock_quantity: product.stock_quantity,
+        unidade: product.unidade,
       },
     });
+    revalidatePath("/");
   } catch (error) {
     console.error("Erro ao criar o produto:", error);
-    return { message: "Falha ao criar o novo produto." };
+    throw new Error("Falha ao criar o novo produto.");
   }
-
-  revalidatePath("/");
 };
 
+// Função para obter todos os produtos
 export const getProductList = async () => {
   try {
     const products = await prisma.product.findMany({
@@ -93,11 +93,10 @@ export const getProductList = async () => {
         image: true,
         category: true,
         isFeatured: true,
-        stock_quantity: true, // Incluindo stock_quantity
+        stock_quantity: true,
+        unidade: true,
       },
-      orderBy: {
-        name: "asc",
-      },
+      orderBy: { name: "asc" },
     });
     return products;
   } catch (error) {
@@ -106,6 +105,7 @@ export const getProductList = async () => {
   }
 };
 
+// Função para buscar um produto por ID
 export const getProductById = async (id: string) => {
   try {
     const product = await prisma.product.findUnique({
@@ -118,9 +118,15 @@ export const getProductById = async (id: string) => {
         image: true,
         category: true,
         isFeatured: true,
-        stock_quantity: true, // Incluindo stock_quantity
+        stock_quantity: true,
+        unidade: true,
       },
     });
+
+    if (!product) {
+      throw new Error(`Produto com ID ${id} não encontrado.`);
+    }
+
     return product;
   } catch (error) {
     console.error("Erro ao buscar o produto por ID:", error);
@@ -128,55 +134,40 @@ export const getProductById = async (id: string) => {
   }
 };
 
-export const updateProduct = async (
-  id: string,
-  {
-    name,
-    cod_prod,
-    isFeatured,
-    category,
-    price,
-    image,
-    stock_quantity, // Incluindo stock_quantity
-  }: UpdatedProducts
-) => {
-  // Validação adicional para o nome do produto
-  if (name.length > 80) {
-    console.log("Nome do produto muito longo.");
-    return { message: "Nome do produto muito longo." };
-  }
-
+// Função para atualizar um produto existente
+export const updateProduct = async (id: string, product: UpdatedProducts) => {
   try {
     await prisma.product.update({
-      data: {
-        name: name,
-        price: new Prisma.Decimal(price),
-        cod_prod: cod_prod,
-        isFeatured: isFeatured,
-        category: category,
-        image: image,
-        stock_quantity: stock_quantity, // Incluindo stock_quantity
-      },
       where: { id },
+      data: {
+        name: product.name,
+        cod_prod: product.cod_prod,
+        price: new Prisma.Decimal(product.price),
+        image: product.image,
+        isFeatured: product.isFeatured,
+        category: product.category,
+        stock_quantity: product.stock_quantity,
+        unidade: product.unidade,
+      },
     });
+    revalidatePath("/");
+    redirect("/");
   } catch (error) {
     console.error("Erro ao atualizar o produto:", error);
-    return { message: "Falha ao atualizar o produto." };
+    throw new Error("Falha ao atualizar o produto.");
   }
-
-  revalidatePath("/");
-  redirect("/");
 };
 
+// Função para deletar um produto
 export const deleteProduct = async (id: string) => {
   try {
     await prisma.product.delete({
       where: { id },
     });
+    console.log(`Produto com ID ${id} deletado com sucesso.`);
+    revalidatePath("/");
   } catch (error) {
     console.error("Erro ao deletar o produto:", error);
-    return { message: "Falha ao deletar o produto." };
+    throw new Error("Falha ao deletar o produto.");
   }
-
-  revalidatePath("/");
 };

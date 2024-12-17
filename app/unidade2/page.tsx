@@ -1,7 +1,6 @@
 "use server";
 
 import { getProductList } from "@/actions/product";
-import banner1 from "@/assets/banner-1.jpg";
 import { auth } from "@/auth";
 import AddProductButton from "@/components/admin/AddProduct";
 import { ProductName } from "@/components/productNameClient";
@@ -9,16 +8,10 @@ import { SheetCategoriesSidebar } from "@/components/site/CategoriesSidebar";
 import DeleteProductButton from "@/components/site/ProductCard/DeleteProductButton";
 import UpdateProductButton from "@/components/site/ProductCard/UpdateProductButton";
 import Navbar from "@/components/site/navbar";
-import { Button } from "@/components/ui/button";
-import { categories } from "@/lib/categories";
-import useCurrencyStore from "@/store/useCurrencyStore";
 import { FolderOpen, Package } from "lucide-react";
-import { revalidatePath } from "next/cache";
 import { PriceCalculed } from "@/components/PriceCalculed";
 import Image from "next/image";
-import { updateCurrency } from "@/actions/currency";
 import AddProductToCartButton from "@/components/site/ProductCard/AddToCartButton";
-import ClearSearchButton from "@/components/ClearSearchButton";
 
 export type ProductsList = {
   id: string;
@@ -29,45 +22,41 @@ export type ProductsList = {
   category: string;
   isFeatured: boolean;
   stock_quantity: number;
-  unidade: string; // Adicionando o campo unidade
+  unidade: string;
 };
 
-export default async function Home({ searchParams }: { searchParams: { cod_prod?: string } }) {
+export default async function Unidade2Page() {
   const allProducts = await getProductList();
 
-  // Filtrar apenas os produtos da UNIDADE_1
-  const filteredProducts = allProducts
-    .filter((product) => product.unidade === "UNIDADE_1")
-    .map((product) => {
-      let priceString = product.price.toFixed(2);
-      priceString = priceString.replace(".", ",");
-      return {
-        ...product,
-        price: priceString,
-      };
-    });
+  // Formatar os produtos para garantir que 'price' seja string
+  const formattedProducts: ProductsList[] = allProducts.map((product) => ({
+    ...product,
+    price: product.price.toString(), // Converte Decimal para string
+  }));
+
+  // Filtrar produtos apenas da Unidade 2
+  const unidade2Products = formattedProducts.filter(
+    (product) => product.unidade === "UNIDADE_2"
+  );
 
   const session = await auth();
 
   return (
     <div className="flex min-h-screen w-full flex-col">
+      {/* Header */}
       <header className="sticky top-0 flex h-20 items-center gap-4 bg-[#1c345c] px-4 md:px-6 z-10">
         <Navbar />
       </header>
+
       <main className="flex flex-col items-center">
         <SheetCategoriesSidebar />
 
         <div className="flex flex-col lg:flex-row lg:justify-between max-w-7xl w-full text-center lg:text-left text-2xl lg:text-3xl mt-16">
-          <h2 className="text-primary font-semibold">Produtos da Unidade 1</h2>
+          <h2 className="text-primary font-semibold">Produtos da Unidade 2</h2>
           {session?.user.role === "ADMIN" && (
             <div className="flex flex-col items-center lg:items-end gap-2 lg:gap-5 mt-5 lg:mt-0">
               <span className="flex items-center gap-1 text-lg">
-                <span className="font-bold mx-1">{categories.length}</span>
-                <FolderOpen />
-                Categorias
-              </span>
-              <span className="flex items-center gap-1 text-lg">
-                <span className="font-bold mx-1">{filteredProducts.length}</span>
+                <span className="font-bold mx-1">{unidade2Products.length}</span>
                 <Package />
                 Produtos
               </span>
@@ -77,8 +66,8 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
         </div>
 
         <div className="flex flex-wrap max-w-[1280px] w-full m-auto gap-10 mt-16 justify-center items-center">
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((product: ProductsList) => (
+          {unidade2Products.length > 0 ? (
+            unidade2Products.map((product: ProductsList) => (
               <div
                 key={product.id}
                 className="max-w-[260px] w-full bg-white shadow-md rounded-lg overflow-hidden my-4 transition-transform transform hover:scale-[1.01]"
@@ -104,17 +93,28 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
                     Unidade: <span className="font-bold">{product.unidade}</span>
                   </div>
                   <div className="flex flex-col gap-5">
-                    <AddProductToCartButton userRole={session?.user.role} product={product} />
+                    <AddProductToCartButton
+                      userRole={session?.user.role}
+                      product={product}
+                    />
                     <div className="flex justify-between">
-                      <UpdateProductButton userRole={session?.user.role} product={product} />
-                      <DeleteProductButton product={product} userRole={session?.user.role} />
+                      <UpdateProductButton
+                        userRole={session?.user.role}
+                        product={product}
+                      />
+                      <DeleteProductButton
+                        product={product}
+                        userRole={session?.user.role}
+                      />
                     </div>
                   </div>
                 </div>
               </div>
             ))
           ) : (
-            <p className="text-center text-lg text-gray-500">Nenhum produto encontrado na Unidade 1.</p>
+            <p className="text-center text-lg text-gray-500">
+              Nenhum produto encontrado para a Unidade 2.
+            </p>
           )}
         </div>
       </main>
