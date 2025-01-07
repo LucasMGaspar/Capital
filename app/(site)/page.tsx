@@ -19,6 +19,7 @@ import Image from "next/image";
 import { updateCurrency } from "@/actions/currency";
 import AddProductToCartButton from "@/components/site/ProductCard/AddToCartButton";
 import ClearSearchButton from "@/components/ClearSearchButton";
+import Link from "next/link"; // Import para navegação
 
 export type ProductsList = {
   id: string;
@@ -29,13 +30,17 @@ export type ProductsList = {
   category: string;
   isFeatured: boolean;
   stock_quantity: number;
-  unidade: string; // Adicionando o campo unidade
+  unidade: string;
 };
 
-export default async function Home({ searchParams }: { searchParams: { cod_prod?: string } }) {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: { cod_prod?: string };
+}) {
   const allProducts = await getProductList();
 
-  // Filtrar apenas os produtos da UNIDADE_1
+  // Filtrar apenas os produtos da UNIDADE_1 e formatar o preço
   const filteredProducts = allProducts
     .filter((product) => product.unidade === "UNIDADE_1")
     .map((product) => {
@@ -51,14 +56,31 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
 
   return (
     <div className="flex min-h-screen w-full flex-col">
+      {/* Header */}
       <header className="sticky top-0 flex h-20 items-center gap-4 bg-[#1c345c] px-4 md:px-6 z-10">
         <Navbar />
       </header>
+
+      {/* Botões centralizados logo abaixo do Header */}
+      <div className="flex justify-center items-center gap-4 mt-6">
+        {/* 1º Botão: Redireciona para a mesma página (Home) */}
+        <Link href="/" passHref>
+          <Button variant="default">Unidade Rio Branco</Button>
+        </Link>
+
+        {/* 2º Botão: Redireciona para /unidade2 */}
+        <Link href="/unidade2" passHref>
+          <Button variant="default"> Unidade Joaquim Lirio</Button>
+        </Link>
+      </div>
+
       <main className="flex flex-col items-center">
         <SheetCategoriesSidebar />
 
         <div className="flex flex-col lg:flex-row lg:justify-between max-w-7xl w-full text-center lg:text-left text-2xl lg:text-3xl mt-16">
-          <h2 className="text-primary font-semibold">Produtos da Unidade 1</h2>
+          <h2 className="text-primary font-semibold">Produtos da Unidade Rio Branco</h2>
+
+          {/* Se o usuário for ADMIN, mostramos algumas estatísticas e o botão de adicionar produto */}
           {session?.user.role === "ADMIN" && (
             <div className="flex flex-col items-center lg:items-end gap-2 lg:gap-5 mt-5 lg:mt-0">
               <span className="flex items-center gap-1 text-lg">
@@ -76,6 +98,7 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
           )}
         </div>
 
+        {/* Cards de Produtos */}
         <div className="flex flex-wrap max-w-[1280px] w-full m-auto gap-10 mt-16 justify-center items-center">
           {filteredProducts.length > 0 ? (
             filteredProducts.map((product: ProductsList) => (
@@ -97,24 +120,30 @@ export default async function Home({ searchParams }: { searchParams: { cod_prod?
                   <div className="text-[#cf964d] text-lg font-bold mb-4 text-center">
                     <PriceCalculed price={product.price} />
                   </div>
-                  <div className="text-gray-500 text-sm text-center mb-4">
-                    Estoque: <span className="font-bold">{product.stock_quantity}</span>
-                  </div>
-                  <div className="text-gray-500 text-sm text-center mb-4">
-                    Unidade: <span className="font-bold">{product.unidade}</span>
-                  </div>
+                
                   <div className="flex flex-col gap-5">
-                    <AddProductToCartButton userRole={session?.user.role} product={product} />
+                    <AddProductToCartButton
+                      userRole={session?.user.role}
+                      product={product}
+                    />
                     <div className="flex justify-between">
-                      <UpdateProductButton userRole={session?.user.role} product={product} />
-                      <DeleteProductButton product={product} userRole={session?.user.role} />
+                      <UpdateProductButton
+                        userRole={session?.user.role}
+                        product={product}
+                      />
+                      <DeleteProductButton
+                        product={product}
+                        userRole={session?.user.role}
+                      />
                     </div>
                   </div>
                 </div>
               </div>
             ))
           ) : (
-            <p className="text-center text-lg text-gray-500">Nenhum produto encontrado na Unidade 1.</p>
+            <p className="text-center text-lg text-gray-500">
+              Nenhum produto encontrado na Unidade 1.
+            </p>
           )}
         </div>
       </main>

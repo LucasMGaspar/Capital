@@ -13,6 +13,11 @@ import { PriceCalculed } from "@/components/PriceCalculed";
 import Image from "next/image";
 import AddProductToCartButton from "@/components/site/ProductCard/AddToCartButton";
 
+// Import para navegação
+import Link from "next/link";
+// Import do seu componente de botão
+import { Button } from "@/components/ui/button"; 
+
 export type ProductsList = {
   id: string;
   name: string;
@@ -48,11 +53,28 @@ export default async function Unidade2Page() {
         <Navbar />
       </header>
 
+      {/* 
+        Botões centralizados logo abaixo do Header 
+        - 1º Botão: Vai para a Unidade Rio Branco ("/") 
+        - 2º Botão: Vai para esta mesma página (Unidade Joaquim Lirio, "/unidade2")
+      */}
+      <div className="flex justify-center items-center gap-4 mt-6">
+        <Link href="/" passHref>
+          <Button variant="default">Unidade Rio Branco</Button>
+        </Link>
+
+        <Link href="/unidade2" passHref>
+          <Button variant="default">Unidade Joaquim Lirio</Button>
+        </Link>
+      </div>
+
       <main className="flex flex-col items-center">
         <SheetCategoriesSidebar />
 
         <div className="flex flex-col lg:flex-row lg:justify-between max-w-7xl w-full text-center lg:text-left text-2xl lg:text-3xl mt-16">
-          <h2 className="text-primary font-semibold">Produtos da Unidade 2</h2>
+          <h2 className="text-primary font-semibold">Produtos da Unidade Rio Joaquim Lirio</h2>
+
+          {/* Mostra estatísticas e botão de adicionar produto apenas para ADMIN */}
           {session?.user.role === "ADMIN" && (
             <div className="flex flex-col items-center lg:items-end gap-2 lg:gap-5 mt-5 lg:mt-0">
               <span className="flex items-center gap-1 text-lg">
@@ -65,6 +87,7 @@ export default async function Unidade2Page() {
           )}
         </div>
 
+        {/* Lista de Produtos */}
         <div className="flex flex-wrap max-w-[1280px] w-full m-auto gap-10 mt-16 justify-center items-center">
           {unidade2Products.length > 0 ? (
             unidade2Products.map((product: ProductsList) => (
@@ -86,12 +109,7 @@ export default async function Unidade2Page() {
                   <div className="text-[#cf964d] text-lg font-bold mb-4 text-center">
                     <PriceCalculed price={product.price} />
                   </div>
-                  <div className="text-gray-500 text-sm text-center mb-4">
-                    Estoque: <span className="font-bold">{product.stock_quantity}</span>
-                  </div>
-                  <div className="text-gray-500 text-sm text-center mb-4">
-                    Unidade: <span className="font-bold">{product.unidade}</span>
-                  </div>
+               
                   <div className="flex flex-col gap-5">
                     <AddProductToCartButton
                       userRole={session?.user.role}
