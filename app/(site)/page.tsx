@@ -61,18 +61,7 @@ export default async function Home({
         <Navbar />
       </header>
 
-      {/* Botões centralizados logo abaixo do Header */}
-      <div className="flex justify-center items-center gap-4 mt-6">
-        {/* 1º Botão: Redireciona para a mesma página (Home) */}
-        <Link href="/" passHref>
-          <Button variant="default">Unidade Rio Branco</Button>
-        </Link>
-
-        {/* 2º Botão: Redireciona para /unidade2 */}
-        <Link href="/unidade2" passHref>
-          <Button variant="default"> Unidade Joaquim Lirio</Button>
-        </Link>
-      </div>
+     
 
       <main className="flex flex-col items-center">
         <SheetCategoriesSidebar />
