@@ -1,7 +1,7 @@
 "use client"
 
 import { deleteProduct } from "@/actions/product";
-import { ProductsList } from "@/app/(site)/page";
+import { ProductsList } from "@/app/unidade/page";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useState } from "react";

@@ -1,4 +1,4 @@
-import { ProductsList } from "@/app/(site)/page";
+import { ProductsList } from "@/app/unidade/page";
 import { auth } from "@/auth";
 import Image from "next/image";
 import AddProductToCartButton from "./AddToCartButton";

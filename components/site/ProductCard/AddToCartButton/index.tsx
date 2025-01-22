@@ -2,7 +2,7 @@
 
 "use client";
 
-import { ProductsList } from "@/app/(site)/page";
+import { ProductsList } from "@/app/unidade/page";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cartStore";
 import { ShoppingCart } from "lucide-react";

@@ -1,6 +1,6 @@
 // useCartStore.ts
 
-import { ProductsList } from "@/app/(site)/page";
+import { ProductsList } from "@/app/unidade/page";
 import create from "zustand";
 import { persist } from "zustand/middleware";
 
