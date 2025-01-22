@@ -53,20 +53,6 @@ export default async function Unidade2Page() {
         <Navbar />
       </header>
 
-      {/* 
-        Botões centralizados logo abaixo do Header 
-        - 1º Botão: Vai para a Unidade Rio Branco ("/") 
-        - 2º Botão: Vai para esta mesma página (Unidade Joaquim Lirio, "/unidade2")
-      */}
-      <div className="flex justify-center items-center gap-4 mt-6">
-        <Link href="/" passHref>
-          <Button variant="default">Unidade Rio Branco</Button>
-        </Link>
-
-        <Link href="/unidade2" passHref>
-          <Button variant="default">Unidade Joaquim Lirio</Button>
-        </Link>
-      </div>
 
       <main className="flex flex-col items-center">
         <SheetCategoriesSidebar />
