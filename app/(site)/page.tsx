@@ -17,12 +17,12 @@ export default function SelecaoUnidadePage() {
         {/* Container com gap entre os botões */}
         <div className="flex gap-4">
           {/* 1º Botão: Redireciona para a mesma página (Home) */}
-          <Link href="/unidade" passHref>
+          <Link href="/rio-branco" passHref>
             <Button variant="default">Unidade Rio Branco</Button>
           </Link>
 
           {/* 2º Botão: Redireciona para /unidade2 */}
-          <Link href="/unidade2" passHref>
+          <Link href="/joaquim-lirio" passHref>
             <Button variant="default">Unidade Joaquim Lirio</Button>
           </Link>
         </div>
