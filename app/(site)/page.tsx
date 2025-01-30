@@ -4,7 +4,7 @@ import Navbar from "@/components/site/navbar";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export default function SelecaoUnidadePage() {
+export default async function SelecaoUnidadePage() {
   return (
     <div className="flex min-h-screen w-full flex-col">
       {/* Header */}
