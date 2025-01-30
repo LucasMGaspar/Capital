@@ -1,4 +1,4 @@
-"use client"; // Caso esteja usando o app router do Next.js (pasta /app)
+"use server"; // Caso esteja usando o app router do Next.js (pasta /app)
 
 import Navbar from "@/components/site/navbar";
 import Link from "next/link";
