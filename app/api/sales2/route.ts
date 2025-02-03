@@ -1,4 +1,4 @@
-// app/api/sales/unidade1/route.ts
+// app/api/sales/unidade2/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
@@ -38,11 +38,11 @@ export async function GET(request: Request) {
       },
     });
 
-    // Para cada pedido, filtra os itens que possuem produtos com UNIDADE_1.
+    // Para cada pedido, filtra os itens que possuem produtos com UNIDADE_2.
     const filteredOrders = orders.map((order) => ({
       ...order,
       orderItems: order.orderItems.filter(
-        (item) => item.product.unidade === 'UNIDADE_1'
+        (item) => item.product.unidade === 'UNIDADE_2'
       ),
     }));
 
@@ -56,7 +56,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ orders: filteredOrders, totalSales });
   } catch (error) {
-    console.error('Erro ao buscar vendas UNIDADE_1:', error);
+    console.error('Erro ao buscar vendas UNIDADE_2:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

@@ -1,6 +1,6 @@
 "use server";
 
-import DashboardRedirectButton from "@/components/admin/DashboardRedirectButton";
+import DashboardRedirectButton2 from "@/components/admin/DashboardRedirectButton2";
 import { getProductList } from "@/actions/product";
 import { auth } from "@/auth";
 import AddProductButton from "@/components/admin/AddProduct";
@@ -73,7 +73,7 @@ export default async function Unidade2Page() {
                 Produtos
               </span>
               <AddProductButton />
-              <DashboardRedirectButton />
+              <DashboardRedirectButton2 />
             </div>
           )}
         </div>
