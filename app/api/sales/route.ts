@@ -1,0 +1,53 @@
+// app/api/sales/route.ts
+import { NextResponse } from 'next/server';
+import {prisma} from '@/lib/db'
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const startDate = searchParams.get('startDate');
+  const endDate = searchParams.get('endDate');
+
+  if (!startDate || !endDate) {
+    return NextResponse.json(
+      { error: 'Parâmetros startDate e endDate são obrigatórios' },
+      { status: 400 }
+    );
+  }
+
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  // Ajusta a data final para incluir todo o dia (até 23:59:59)
+  end.setHours(23, 59, 59, 999);
+
+  try {
+    // Busca os pedidos com status "paid" no período informado, incluindo os itens do pedido.
+    const orders = await prisma.order.findMany({
+      where: {
+        status: 'paid',
+        createdAt: {
+          gte: start,
+          lte: end,
+        },
+      },
+      include: {
+        orderItems: true,
+      },
+    });
+
+    // Calcula o total das vendas: para cada pedido, soma (unitPrice * quantity) de cada item.
+    const totalSales = orders.reduce((acc, order) => {
+      const orderTotal = order.orderItems.reduce((sum, item) => {
+        return sum + parseFloat(item.unitPrice.toString()) * item.quantity;
+      }, 0);
+      return acc + orderTotal;
+    }, 0);
+
+    return NextResponse.json({ orders, totalSales });
+  } catch (error) {
+    console.error('Erro ao buscar vendas:', error);
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
+  }
+}

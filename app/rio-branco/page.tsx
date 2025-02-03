@@ -1,5 +1,6 @@
 "use server";
 
+import DashboardRedirectButton from "@/components/admin/DashboardRedirectButton";
 import { getProductList } from "@/actions/product";
 import banner1 from "@/assets/banner-1.jpg";
 import { auth } from "@/auth";
@@ -86,6 +87,7 @@ export default async function Home({
                 Produtos
               </span>
               <AddProductButton />
+              <DashboardRedirectButton />
             </div>
           )}
         </div>
