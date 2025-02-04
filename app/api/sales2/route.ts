@@ -1,4 +1,3 @@
-// app/api/sales/unidade2/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
@@ -38,7 +37,7 @@ export async function GET(request: Request) {
       },
     });
 
-    // Para cada pedido, filtra os itens que possuem produtos com UNIDADE_2.
+    // Para cada pedido, filtra os itens que possuem produtos com UNIDADE_1.
     const filteredOrders = orders.map((order) => ({
       ...order,
       orderItems: order.orderItems.filter(

@@ -9,7 +9,7 @@ const Login = async () => {
       </header>
       <div className="relative w-full min-h-screen flex items-center justify-center"
         style={{
-          backgroundImage: "url('/background-01.jpg')",
+          backgroundImage: "url('/nacaipital.jpg')",
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}

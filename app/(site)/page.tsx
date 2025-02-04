@@ -22,8 +22,8 @@ export default async function SelecaoUnidadePage() {
           </Link>
 
           {/* 2º Botão: Redireciona para /unidade2 */}
-          <Link href="/joaquim-lirio" passHref>
-            <Button variant="default">Unidade Joaquim Lirio</Button>
+          <Link href="/joao-da-cruz" passHref>
+            <Button variant="default">Unidade João da Cruz </Button>
           </Link>
         </div>
       </main>

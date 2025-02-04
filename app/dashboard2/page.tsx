@@ -1,4 +1,3 @@
-// app/dashboard/page.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -60,6 +59,8 @@ export default function Dashboard() {
     setError('');
     setLoading(true);
     try {
+      // Utiliza o endpoint /api/sales3 que filtra os itens com UNIDADE_2 no back-end (se implementado)
+      // Caso o back-end não filtre, você pode filtrar aqui no front-end.
       const response = await fetch(
         `/api/sales2?startDate=${startDate}&endDate=${endDate}`
       );
@@ -77,10 +78,36 @@ export default function Dashboard() {
     }
   };
 
-  // Se os dados de vendas estiverem disponíveis, calcula a distribuição de vendas por categoria
+  // Realiza a filtragem dos pedidos para manter somente os itens com unidade "UNIDADE_2"
+  let filteredOrders: Order[] = [];
+  let totalOrders = 0;
+  let totalSales = 0;
   let pieChartData = null;
+
   if (salesData) {
-    const categoryData = salesData.orders.reduce((acc, order) => {
+    filteredOrders = salesData.orders
+      .map(order => ({
+        ...order,
+        orderItems: order.orderItems.filter(
+          item => item.product?.unidade === "UNIDADE_2"
+        )
+      }))
+      // Remove os pedidos que, após a filtragem, não possuem nenhum item
+      .filter(order => order.orderItems.length > 0);
+
+    totalOrders = filteredOrders.length;
+    totalSales = filteredOrders.reduce((sum, order) => {
+      return (
+        sum +
+        order.orderItems.reduce(
+          (sub, item) => sub + parseFloat(item.unitPrice) * item.quantity,
+          0
+        )
+      );
+    }, 0);
+
+    // Calcula a distribuição de vendas por categoria (apenas para os itens filtrados)
+    const categoryData = filteredOrders.reduce((acc, order) => {
       order.orderItems.forEach((item) => {
         const category = item.product?.category || 'Sem Categoria';
         const itemTotal = parseFloat(item.unitPrice) * item.quantity;
@@ -171,13 +198,13 @@ export default function Dashboard() {
               <div className="bg-green-100 border-l-4 border-green-500 p-4 rounded">
                 <p className="text-gray-600">Total de Pedidos (status paid)</p>
                 <p className="text-2xl font-bold text-green-700">
-                  {salesData.orders.length}
+                  {totalOrders}
                 </p>
               </div>
               <div className="bg-blue-100 border-l-4 border-blue-500 p-4 rounded">
                 <p className="text-gray-600">Total de Vendas</p>
                 <p className="text-2xl font-bold text-blue-700">
-                  R$ {parseFloat(salesData.totalSales.toString()).toFixed(2)}
+                  R$ {totalSales.toFixed(2)}
                 </p>
               </div>
             </div>
@@ -209,27 +236,37 @@ export default function Dashboard() {
                       <th className="px-6 py-3 border-b-2 border-gray-200 text-left text-sm font-medium text-blue-500 uppercase tracking-wider">
                         Data
                       </th>
+                      <th className="px-6 py-3 border-b-2 border-gray-200 text-left text-sm font-medium text-blue-500 uppercase tracking-wider">
+                        Produtos
+                      </th>
                       <th className="px-6 py-3 border-b-2 border-gray-200 text-right text-sm font-medium text-blue-500 uppercase tracking-wider">
                         Total
                       </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white">
-                    {salesData.orders.map((order) => {
-                      const orderTotal = order.orderItems.reduce((sum, item) => {
-                        return sum + parseFloat(item.unitPrice) * item.quantity;
-                      }, 0);
+                    {filteredOrders.map((order) => {
+                      const orderTotal = order.orderItems.reduce(
+                        (sum, item) =>
+                          sum + parseFloat(item.unitPrice) * item.quantity,
+                        0
+                      );
                       return (
                         <tr key={order.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                            <div className="text-sm text-gray-800">
-                              #{order.id}
-                            </div>
+                            <div className="text-sm text-gray-800">#{order.id}</div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
                             <div className="text-sm text-gray-800">
                               {new Date(order.createdAt).toLocaleDateString()}
                             </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                            {order.orderItems.map((item) => (
+                              <div key={item.id} className="text-sm text-gray-800">
+                                {item.product.name} (x{item.quantity})
+                              </div>
+                            ))}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 text-right">
                             <div className="text-sm text-gray-800">

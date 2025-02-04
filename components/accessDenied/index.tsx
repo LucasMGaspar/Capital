@@ -7,7 +7,7 @@ export default function AccessDenied() {
     <div
       className="flex justify-center items-center h-full"
       style={{
-        backgroundImage: "url('/background-01.jpg')",
+        backgroundImage: "url('/nacaipital.jpg')",
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}>

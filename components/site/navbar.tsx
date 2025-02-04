@@ -12,7 +12,7 @@ const Navbar = async () => {
   const session = await auth();
 
   return (
-    <div className="flex w-full justify-between items-center lg:mx-10 h-16 bg-[#1c345c]"> {/* Cor azul escuro como exemplo */}
+    <div className="flex w-full justify-between items-center lg:mx-10 h-16 "> {/* Cor azul escuro como exemplo */}
       <Link href="/" className="flex justify-center items-center h-full">
         <Image
           className="h-full max-h-full cursor-pointer object-contain" // Ajusta a logo para caber dentro da navbar

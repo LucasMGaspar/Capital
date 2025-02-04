@@ -1,4 +1,3 @@
-// app/api/sales/unidade1/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 

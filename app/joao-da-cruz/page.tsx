@@ -60,7 +60,7 @@ export default async function Unidade2Page() {
 
         <div className="flex flex-col lg:flex-row items-center lg:justify-between max-w-7xl w-full text-center text-2xl lg:text-3xl mt-16">
           <h2 className="text-primary font-semibold">
-            Produtos da Unidade Joaquim Lirio
+            Produtos da Unidade João Da Cruz
           </h2>
 
 
