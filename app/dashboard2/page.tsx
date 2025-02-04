@@ -26,7 +26,7 @@ interface OrderItem {
   orderId: number;
   productId: string;
   quantity: number;
-  unitPrice: string; // o Prisma pode retornar decimais como string
+  unitPrice: string; // Pode vir como string
   product: Product;
 }
 
@@ -42,14 +42,31 @@ interface Order {
 interface SalesResponse {
   orders: Order[];
   totalSales: number;
+  totalProductQuantity?: number;
+  productStock?: number | null;
 }
 
 export default function Dashboard() {
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
+  const [selectedProduct, setSelectedProduct] = useState<string>(''); // filtro por produto
   const [salesData, setSalesData] = useState<SalesResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
+
+  // Lista de produtos para o filtro
+  const productOptions = [
+    'Amstel Long Neck',
+    'Chá Baer-Mate',
+    'Clash´D',
+    'Eisenbahn Long Neck',
+    'Heineken Long Neck',
+    'Ipa Long Neck',
+    'Mamba Watter C/Gás',
+    'Mamba Watter S/Gás',
+    'Praya Long Neck',
+    'Suco Mitto',
+  ];
 
   const fetchSales = async () => {
     if (!startDate || !endDate) {
@@ -59,11 +76,12 @@ export default function Dashboard() {
     setError('');
     setLoading(true);
     try {
-      // Utiliza o endpoint /api/sales3 que filtra os itens com UNIDADE_2 no back-end (se implementado)
-      // Caso o back-end não filtre, você pode filtrar aqui no front-end.
-      const response = await fetch(
-        `/api/sales2?startDate=${startDate}&endDate=${endDate}`
-      );
+      // Monta a URL do endpoint para UNIDADE_2, incluindo o filtro de produto, se selecionado
+      let url = `/api/sales2?startDate=${startDate}&endDate=${endDate}`;
+      if (selectedProduct) {
+        url += `&product=${encodeURIComponent(selectedProduct)}`;
+      }
+      const response = await fetch(url);
       const data: SalesResponse | { error: string } = await response.json();
       if (response.ok) {
         setSalesData(data as SalesResponse);
@@ -78,66 +96,35 @@ export default function Dashboard() {
     }
   };
 
-  // Realiza a filtragem dos pedidos para manter somente os itens com unidade "UNIDADE_2"
-  let filteredOrders: Order[] = [];
+  // Os dados retornados já vêm filtrados por UNIDADE_2 e, se informado, pelo produto selecionado.
+  let orders: Order[] = [];
   let totalOrders = 0;
   let totalSales = 0;
   let pieChartData = null;
 
   if (salesData) {
-    filteredOrders = salesData.orders
-      .map(order => ({
-        ...order,
-        orderItems: order.orderItems.filter(
-          item => item.product?.unidade === "UNIDADE_2"
-        )
-      }))
-      // Remove os pedidos que, após a filtragem, não possuem nenhum item
-      .filter(order => order.orderItems.length > 0);
+    orders = salesData.orders;
+    totalOrders = orders.length;
+    totalSales = salesData.totalSales;
 
-    totalOrders = filteredOrders.length;
-    totalSales = filteredOrders.reduce((sum, order) => {
-      return (
-        sum +
-        order.orderItems.reduce(
-          (sub, item) => sub + parseFloat(item.unitPrice) * item.quantity,
-          0
-        )
-      );
-    }, 0);
-
-    // Calcula a distribuição de vendas por categoria (apenas para os itens filtrados)
-    const categoryData = filteredOrders.reduce((acc, order) => {
+    // Agrupa os valores vendidos por produto para o gráfico
+    const productData = orders.reduce((acc, order) => {
       order.orderItems.forEach((item) => {
-        const category = item.product?.category || 'Sem Categoria';
+        const productName = item.product.name;
         const itemTotal = parseFloat(item.unitPrice) * item.quantity;
-        acc[category] = (acc[category] || 0) + itemTotal;
+        acc[productName] = (acc[productName] || 0) + itemTotal;
       });
       return acc;
     }, {} as Record<string, number>);
 
     pieChartData = {
-      labels: Object.keys(categoryData),
+      labels: Object.keys(productData),
       datasets: [
         {
-          label: 'Vendas por Categoria',
-          data: Object.values(categoryData),
-          backgroundColor: [
-            '#FF6384',
-            '#36A2EB',
-            '#FFCE56',
-            '#4BC0C0',
-            '#9966FF',
-            '#FF9F40',
-          ],
-          hoverBackgroundColor: [
-            '#FF6384',
-            '#36A2EB',
-            '#FFCE56',
-            '#4BC0C0',
-            '#9966FF',
-            '#FF9F40',
-          ],
+          label: 'Vendas por Produto',
+          data: Object.values(productData),
+          backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'],
+          hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'],
         },
       ],
     };
@@ -146,9 +133,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg p-8">
-        <h1 className="text-3xl font-bold mb-6 text-gray-800">
-          Dashboard de Vendas
-        </h1>
+        <h1 className="text-3xl font-bold mb-6 text-gray-800">Dashboard de Vendas</h1>
 
         {/* Seção de filtros */}
         <div className="mb-8">
@@ -162,7 +147,7 @@ export default function Dashboard() {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+                className="w-full border border-gray-300 rounded-md px-3 py-2"
               />
             </div>
             <div className="mb-4 sm:mb-0">
@@ -174,13 +159,31 @@ export default function Dashboard() {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+                className="w-full border border-gray-300 rounded-md px-3 py-2"
               />
+            </div>
+            <div className="mb-4 sm:mb-0">
+              <label htmlFor="product" className="block text-gray-600 mb-1">
+                Filtrar por Produto:
+              </label>
+              <select
+                id="product"
+                value={selectedProduct}
+                onChange={(e) => setSelectedProduct(e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2"
+              >
+                <option value="">Todos</option>
+                {productOptions.map((prod) => (
+                  <option key={prod} value={prod}>
+                    {prod}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="flex-shrink-0">
               <button
                 onClick={fetchSales}
-                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 rounded-md shadow transition-colors duration-200"
+                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 rounded-md"
               >
                 Buscar Vendas
               </button>
@@ -193,27 +196,39 @@ export default function Dashboard() {
 
         {salesData && (
           <>
-            {/* Cards com métricas */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {/* Cards com Métricas */}
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
               <div className="bg-green-100 border-l-4 border-green-500 p-4 rounded">
                 <p className="text-gray-600">Total de Pedidos (status paid)</p>
-                <p className="text-2xl font-bold text-green-700">
-                  {totalOrders}
-                </p>
+                <p className="text-2xl font-bold text-green-700">{totalOrders}</p>
               </div>
               <div className="bg-blue-100 border-l-4 border-blue-500 p-4 rounded">
                 <p className="text-gray-600">Total de Vendas</p>
-                <p className="text-2xl font-bold text-blue-700">
-                  R$ {totalSales.toFixed(2)}
-                </p>
+                <p className="text-2xl font-bold text-blue-700">R$ {totalSales.toFixed(2)}</p>
               </div>
+              {selectedProduct && salesData.totalProductQuantity !== undefined && (
+                <div className="bg-purple-100 border-l-4 border-purple-500 p-4 rounded">
+                  <p className="text-gray-600">
+                    Quantidade vendida de <strong>{selectedProduct}</strong>
+                  </p>
+                  <p className="text-2xl font-bold text-purple-700">{salesData.totalProductQuantity}</p>
+                </div>
+              )}
+              {selectedProduct && salesData.productStock !== undefined && (
+                <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 rounded">
+                  <p className="text-gray-600">
+                    Estoque de <strong>{selectedProduct}</strong>
+                  </p>
+                  <p className="text-2xl font-bold text-yellow-700">{salesData.productStock}</p>
+                </div>
+              )}
             </div>
 
-            {/* Gráfico de Pizza: Distribuição de Vendas por Categoria */}
+            {/* Gráfico de Pizza: Distribuição de Vendas por Produto */}
             {pieChartData && (
               <div className="mb-8">
                 <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                  Distribuição de Vendas por Categoria
+                  Distribuição de Vendas por Produto
                 </h2>
                 <div className="max-w-md mx-auto">
                   <Pie data={pieChartData} />
@@ -221,7 +236,7 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* Tabela de detalhes dos pedidos */}
+            {/* Tabela de Detalhes dos Pedidos */}
             <div>
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">
                 Detalhes dos Pedidos
@@ -230,48 +245,41 @@ export default function Dashboard() {
                 <table className="min-w-full bg-white">
                   <thead>
                     <tr>
-                      <th className="px-6 py-3 border-b-2 border-gray-200 text-left text-sm font-medium text-blue-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-blue-500 uppercase">
                         Pedido
                       </th>
-                      <th className="px-6 py-3 border-b-2 border-gray-200 text-left text-sm font-medium text-blue-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-blue-500 uppercase">
                         Data
                       </th>
-                      <th className="px-6 py-3 border-b-2 border-gray-200 text-left text-sm font-medium text-blue-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-blue-500 uppercase">
                         Produtos
                       </th>
-                      <th className="px-6 py-3 border-b-2 border-gray-200 text-right text-sm font-medium text-blue-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 border-b text-right text-sm font-medium text-blue-500 uppercase">
                         Total
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white">
-                    {filteredOrders.map((order) => {
+                  <tbody>
+                    {orders.map((order) => {
                       const orderTotal = order.orderItems.reduce(
-                        (sum, item) =>
-                          sum + parseFloat(item.unitPrice) * item.quantity,
+                        (sum, item) => sum + parseFloat(item.unitPrice) * item.quantity,
                         0
                       );
                       return (
                         <tr key={order.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                            <div className="text-sm text-gray-800">#{order.id}</div>
+                          <td className="px-6 py-4 border-b">#{order.id}</td>
+                          <td className="px-6 py-4 border-b">
+                            {new Date(order.createdAt).toLocaleDateString()}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                            <div className="text-sm text-gray-800">
-                              {new Date(order.createdAt).toLocaleDateString()}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                          <td className="px-6 py-4 border-b">
                             {order.orderItems.map((item) => (
                               <div key={item.id} className="text-sm text-gray-800">
                                 {item.product.name} (x{item.quantity})
                               </div>
                             ))}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200 text-right">
-                            <div className="text-sm text-gray-800">
-                              R$ {orderTotal.toFixed(2)}
-                            </div>
+                          <td className="px-6 py-4 border-b text-right">
+                            R$ {orderTotal.toFixed(2)}
                           </td>
                         </tr>
                       );

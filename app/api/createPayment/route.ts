@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
       payer: {
         name: "Lucas",
         surname: "Gaspar",
-        email: "lucasmanoel.g.g@gmail.com",
+        email: "nacapital@gmail.com",
         identification: {
           type: "CPF",
           number: "13975394617"
