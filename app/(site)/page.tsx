@@ -18,7 +18,7 @@ export default async function SelecaoUnidadePage() {
         <div className="flex gap-4">
           {/* 1º Botão: Redireciona para a mesma página (Home) */}
           <Link href="/rio-branco" passHref>
-            <Button variant="default">Unidade Rio Branco</Button>
+            <Button variant="default">Unidad Rio Branco</Button>
           </Link>
 
           {/* 2º Botão: Redireciona para /unidade2 */}
